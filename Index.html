@@ -2,257 +2,251 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>MiaShop - Acceso Mágico</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <title>MiaShop - Acceso Administrativo</title>
+  <!-- Google Fonts: Spectral (Estilo mágico/serif) e Inter (SaaS limpio) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS para layouts responsivos estructurados -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Identity Services (GIS) para el login seguro -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
   <style>
+    /* Configuración de fuentes */
+    .font-magic { font-family: 'Spectral', serif; }
+    .font-sans-clean { font-family: 'Inter', sans-serif; }
+
+    /* Fondo Pastel Mágico con Animación de Movimiento */
     body {
-      font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(135deg, #FFF0ED 0%, #FFE5E0 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
-      position: relative;
+      background: linear-gradient(-45deg, #fce4ec, #f3e5f5, #e8eaf6, #e1f5fe);
+      background-size: 400% 400%;
+      animation: magicalGlow 15s ease infinite;
+      overflow: hidden;
     }
-    h1, h2, .magic-title { font-family: 'Cinzel', serif; }
-    .magic-card {
-      box-shadow: 0 15px 35px rgba(245, 135, 110, 0.12), 0 0 20px rgba(197, 160, 89, 0.15);
-      border: 1px solid rgba(197, 160, 89, 0.25);
-      background-color: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(8px);
-      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+    @keyframes magicalGlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
+
+    /* Partículas de destellos de fondo */
     .sparkle {
       position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #C5A059;
+      background: white;
       border-radius: 50%;
       pointer-events: none;
-      animation: fly 9s infinite linear;
-      opacity: 0.5;
+      opacity: 0.6;
+      animation: floatSparkle 8s infinite linear;
     }
-    @keyframes fly {
-      0% { transform: translateY(100vh) translateX(0) scale(1); opacity: 0; }
-      50% { opacity: 0.7; }
-      100% { transform: translateY(-10vh) translateX(40px) scale(0); opacity: 0; }
+
+    @keyframes floatSparkle {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+      50% { opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+
+    /* Glassmorphism para la tarjeta principal */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 20px 40px rgba(125, 90, 148, 0.1);
+    }
+
+    /* Brillo mágico al enfocar inputs */
+    .input-magic:focus {
+      border-color: #F2846B;
+      box-shadow: 0 0 12px rgba(242, 132, 107, 0.4);
+      outline: none;
+    }
+
+    /* Animación de Transición de Pantallas */
+    .screen-transition {
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
 </head>
-<body>
+<body class="font-sans-clean min-h-screen flex items-center justify-center relative px-4">
 
-  <!-- Partículas Místicas -->
-  <div class="sparkle" style="left: 8%; animation-delay: 0s;"></div>
-  <div class="sparkle" style="left: 25%; animation-delay: 2.5s; width: 6px; height: 6px;"></div>
-  <div class="sparkle" style="left: 65%; animation-delay: 4.5s;"></div>
-  <div class="sparkle" style="left: 88%; animation-delay: 1.2s; width: 5px; height: 5px;"></div>
+  <!-- Capa de destellos mágicos animados -->
+  <div id="sparkle-container" class="absolute inset-0 z-0 overflow-hidden"></div>
 
-  <!-- Botón Flotante para Control de Música -->
-  <button id="btnMusica" onclick="alternarMusica()" class="fixed top-4 right-4 z-50 bg-[#F5876E] hover:bg-[#e2735b] text-white p-3 rounded-full shadow-lg flex items-center justify-center transition-all duration-300">
-    <span id="musicIcon" class="text-xl">🪄</span>
-    <span id="musicText" class="text-xs ml-1 font-semibold max-w-0 overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out md:max-w-xs">Activar Magia</span>
-  </button>
+  <!-- Tarjeta de Login Principal -->
+  <div class="glass-card w-full max-w-md rounded-2xl p-8 z-10 text-center relative overflow-hidden screen-transition" id="auth-card">
+    
+    <!-- Decoración visual dorada/mágica superior -->
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#F2846B] via-[#D4AF37] to-[#7d5a94]"></div>
 
-  <div class="w-full max-w-md p-6 mx-4">
-    <div class="magic-card rounded-3xl p-8 text-center relative overflow-hidden" id="cardContainer">
-      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#C5A059] via-[#F5876E] to-[#C5A059]"></div>
-
-      <div class="flex justify-center mb-6">
-        <div class="relative">
-          <div class="w-28 h-28 flex items-center justify-center rounded-full bg-transparent p-1">
-            <img id="logoMiaShop" src="https://i.ibb.co/L5w2Hsc/image.png" alt="MiaShop Logo" class="object-contain w-full h-full">
-          </div>
-          <div class="absolute inset-0 bg-red-200 rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-pulse"></div>
-        </div>
+    <!-- Header / Logo -->
+    <div class="mb-6">
+      <div class="flex justify-center mb-3">
+        <!-- Reemplazar src con la URL de tu imagen procesada si lo deseas -->
+        <img id="logo" src="https://drive.google.com/file/d/18gUt5Y7CiwuTT4OsGIhDzRm_GlKWk3Ub/view?usp=sharing" 
+             alt="MiaShop Logo" class="h-16 w-auto object-contain drop-shadow-md">
       </div>
-
-      <h1 class="text-2xl font-bold text-gray-800 mb-1 tracking-wider">MiaShop</h1>
-      <p class="text-xs text-[#C5A059] font-semibold tracking-widest mb-6 uppercase magic-title">Consola de Control</p>
-
-      <!-- PASO 1 -->
-      <div id="stepEmail" class="transition-all duration-500 block">
-        <div class="mb-6 text-left">
-          <label for="correoAdmin" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Llave de Identidad (Correo)</label>
-          <input type="email" id="correoAdmin" placeholder="tu-correo@gmail.com" required
-                 class="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:border-[#F5876E] focus:outline-none transition-all duration-300 bg-gray-50 text-center text-gray-700">
-        </div>
-        <button onclick="enviarSolicitudCorreo()" id="btnEnviarCorreo"
-                class="w-full bg-[#F5876E] hover:bg-[#e2735b] text-white py-4 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-300">
-          Invocar Código de Acceso ⚡
-        </button>
-      </div>
-
-      <!-- PASO 2 -->
-      <div id="step2FA" class="hidden transition-all duration-500">
-        <div class="mb-6">
-          <label for="codigo2fa" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Introduce el Código Mágico enviado</label>
-          <input type="text" id="codigo2fa" placeholder="0 0 0 0 0 0" maxlength="6" 
-                 class="w-full text-center text-3xl tracking-[0.5em] font-bold py-3 border border-gray-200 rounded-2xl focus:border-[#F5876E] focus:outline-none transition-all duration-300 bg-gray-50 text-gray-800">
-          <p class="text-[11px] text-[#C5A059] mt-2 italic font-serif">Revisa la bandeja de entrada de tu correo.</p>
-        </div>
-        <button onclick="validarCodigo2FA()" id="btnValidar2fa"
-                class="w-full bg-[#C5A059] hover:bg-[#b08d4b] text-white py-4 rounded-2xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 tracking-wider uppercase text-sm">
-          Revelar Andén de Entrada 🔮
-        </button>
-        <button onclick="volverAlPasoUno()" class="text-xs text-gray-400 hover:text-gray-600 underline mt-4 block mx-auto">Cambiar de correo</button>
-      </div>
-
-      <div id="loading" class="hidden my-8">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#F5876E] mx-auto"></div>
-        <p class="text-xs text-gray-400 mt-4 italic font-serif">Invocando el hechizo de autenticación...</p>
-      </div>
-
-      <div id="statusMessage" class="hidden mt-6 p-4 rounded-2xl text-xs font-medium"></div>
+      <h1 class="font-magic text-3xl font-semibold text-[#7d5a94] tracking-wide">MiaShop</h1>
+      <p class="text-sm text-gray-500 italic mt-1">El portal mágico de tus importaciones</p>
     </div>
+
+    <!-- PANTALLA 1: ACCESO CON GOOGLE -->
+    <div id="screen-login" class="screen-transition opacity-100 block">
+      <p class="text-gray-600 mb-6 text-sm">Por favor, inicia sesión con tu cuenta de Google autorizada para acceder al panel de control.</p>
+      
+      <!-- Entrada manual de simulación de correo o integración directa -->
+      <div class="mb-4">
+        <input type="email" id="user-email" placeholder="Introduce tu correo de Google" 
+               class="w-full px-4 py-3 rounded-xl border border-gray-200 input-magic text-center text-sm transition-all"
+               value="miashop.retail.peru@gmail.com" readonly>
+      </div>
+
+      <!-- Botón de Acción Principal (Estilo Mágico Rosa/Coral con animación) -->
+      <button onclick="solicitarAcceso()" id="btn-login"
+              class="w-full bg-gradient-to-r from-[#F2846B] to-[#7d5a94] text-white font-medium py-3 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+        ✨ Lanzar Hechizo de Acceso (Iniciar)
+      </button>
+    </div>
+
+    <!-- PANTALLA 2: SEGUNDO FACTOR DE AUTENTICACIÓN (2FA OTP) -->
+    <div id="screen-otp" class="screen-transition opacity-0 hidden">
+      <div class="mb-4 text-center">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-[#7d5a94] mb-3">
+          <span class="text-xl">🔮</span>
+        </div>
+        <p class="text-gray-600 text-sm">Hemos enviado un código de verificación a tu correo de administradora. Ingrésalo a continuación para continuar.</p>
+      </div>
+
+      <!-- Input de OTP mágico con espaciado amplio -->
+      <div class="mb-6">
+        <input type="text" id="otp-input" placeholder="· · · · · ·" maxlength="6"
+               class="w-full px-4 py-4 rounded-xl border border-gray-200 input-magic text-center text-2xl font-bold tracking-widest text-[#7d5a94] transition-all">
+      </div>
+
+      <div class="space-y-3">
+        <button onclick="procesarVerificacionOTP()" id="btn-verify"
+                class="w-full bg-[#7d5a94] text-white font-medium py-3 px-6 rounded-xl hover:bg-[#68497d] hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+          🔑 Verificar Código
+        </button>
+        <button onclick="regresarAlLogin()" class="text-xs text-gray-500 hover:text-[#F2846B] underline block mx-auto transition-colors">
+          Regresar
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensajes de Estado / Notificaciones -->
+    <div id="status-message" class="mt-4 text-xs font-medium hidden"></div>
+
   </div>
 
-  <audio id="musicaFondo" loop preload="auto">
-    <source src="https://ia801309.us.archive.org/28/items/HarryPotterThemeSong/Harry%20Potter%20Theme%20Song.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="sonidoExito" preload="auto">
-    <source src="https://www.soundjay.com/misc/sounds/magic-chime-01.mp3" type="audio/mpeg">
-  </audio>
-
   <script>
-    // 🔔 AQUÍ COLOCAS LA URL (GAS_) DE TU APP SCRIPT DE GOOGLE SHEETS
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyfI10LCstUdJ0spkL_mV0fMnuBD0QyECv9ck-2-KPDPGxLUHNnYkfCayrGmJteSD3bMA/exec";
-
-    const musica = document.getElementById('musicaFondo');
-    const sonidoExito = document.getElementById('sonidoExito');
-    let musicaIniciada = false;
-
-    musica.volume = 0.20;
-    sonidoExito.volume = 0.40;
-
-    document.body.addEventListener('click', () => {
-      if (!musicaIniciada) { reproducirMusicaDeFondo(); }
-    }, { once: true });
-
-    function alternarMusica() {
-      if (musica.paused) {
-        reproducirMusicaDeFondo();
-      } else {
-        musica.pause();
-        document.getElementById('musicIcon').innerText = '🔇';
-        document.getElementById('musicText').innerText = 'Magia Pausada';
+    // Generar partículas mágicas de fondo al cargar la página
+    function createSparkles() {
+      const container = document.getElementById('sparkle-container');
+      const count = 15;
+      for (let i = 0; i < count; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = Math.random() * 100 + 'vw';
+        sparkle.style.width = sparkle.style.height = (Math.random() * 6 + 4) + 'px';
+        sparkle.style.animationDelay = (Math.random() * 8) + 's';
+        sparkle.style.animationDuration = (Math.random() * 6 + 6) + 's';
+        container.appendChild(sparkle);
       }
     }
+    createSparkles();
 
-    function reproducirMusicaDeFondo() {
-      musica.play().then(() => {
-        musicaIniciada = true;
-        document.getElementById('musicIcon').innerText = '🔮';
-        document.getElementById('musicText').innerText = 'Hechizo Activo';
-      }).catch(err => { console.log("Se requiere interacción para reproducir."); });
+    // Mostrar mensajes en la interfaz
+    function showMessage(text, isError = false) {
+      const msgDiv = document.getElementById('status-message');
+      msgDiv.innerText = text;
+      msgDiv.className = `mt-4 text-xs font-medium ${isError ? 'text-red-500' : 'text-emerald-600'} block`;
     }
 
-    /**
-     * Comunicación HTTP POST con tu Google Sheet en lugar de google.script.run
-     */
-    function enviarSolicitudCorreo() {
-      const email = document.getElementById('correoAdmin').value.trim();
-      if (!email) {
-        mostrarMensaje("Por favor, introduce tu correo administrador.", "error");
-        return;
-      }
+    // Petición al Backend para iniciar login y disparar OTP
+    function solicitarAcceso() {
+      const email = document.getElementById('user-email').value;
+      const btn = document.getElementById('btn-login');
+      
+      btn.disabled = true;
+      btn.innerText = "🪄 Invocando código...";
+      showMessage("Verificando credenciales y enviando código...");
 
-      mostrarCarga(true);
-      mostrarMensaje("", "limpiar");
-
-      // Usamos fetch para conectar GitHub con tu Apps Script
-      fetch(GAS_URL, {
-        method: "POST",
-        mode: "no-cors", // Evita problemas de CORS preflight en navegadores
-        body: JSON.stringify({ accion: "solicitarCodigo", email: email })
-      })
-      .then(() => {
-        // Al usar "no-cors", el navegador no nos deja leer la respuesta por seguridad,
-        // pero la petición sí llega y ejecuta el envío del correo en tu Apps Script.
-        mostrarCarga(false);
-        document.getElementById('stepEmail').classList.add('hidden');
-        document.getElementById('step2FA').classList.remove('hidden');
-        mostrarMensaje("Si el correo es correcto, recibirás el código en un instante.", "exito");
-      })
-      .catch(err => {
-        mostrarCarga(false);
-        mostrarMensaje("Error de conexión con el servidor místico.", "error");
-      });
-    }
-
-    function validarCodigo2FA() {
-      const codigo = document.getElementById('codigo2fa').value.trim();
-      if (codigo.length < 6) {
-        mostrarMensaje("El código debe tener exactamente 6 dígitos.", "error");
-        return;
-      }
-
-      mostrarCarga(true);
-      mostrarMensaje("", "limpiar");
-
-      // Para validar el código sí necesitamos leer la respuesta (CORS estándar).
-      // El doPost del backend ya tiene las cabeceras CORS configuradas.
-      fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ accion: "verificarCodigo", codigo: codigo })
-      })
-      .then(res => res.json())
-      .then(resultado => {
-        mostrarCarga(false);
-        if (resultado.exito) {
-          musica.pause();
-          sonidoExito.play();
-          mostrarMensaje(resultado.mensaje, "exito");
+      google.script.run
+        .withSuccessHandler(function(response) {
+          btn.disabled = false;
+          btn.innerText = "✨ Lanzar Hechizo de Acceso (Iniciar)";
           
-          const card = document.getElementById('cardContainer');
-          card.style.transform = "scale(0.9) translateY(-30px)";
-          card.style.opacity = "0";
-
-          setTimeout(() => {
-            alert("🧙‍♂️ ¡Hechizo correcto! Has cruzado exitosamente el andén de MiaShop.");
-          }, 1000);
-        } else {
-          mostrarMensaje(resultado.mensaje, "error");
-        }
-      })
-      .catch(err => {
-        mostrarCarga(false);
-        mostrarMensaje("Código incorrecto o error de comunicación.", "error");
-      });
+          if (response.success) {
+            showMessage(response.message);
+            // Animación de transición hacia la pantalla 2FA (OTP)
+            transitionToScreen('screen-login', 'screen-otp');
+          }
+        })
+        .withFailureHandler(function(error) {
+          btn.disabled = false;
+          btn.innerText = "✨ Lanzar Hechizo de Acceso (Iniciar)";
+          showMessage(error.message, true);
+        })
+        .iniciarAutenticacion(email);
     }
 
-    function volverAlPasoUno() {
-      document.getElementById('step2FA').classList.add('hidden');
-      document.getElementById('stepEmail').classList.remove('hidden');
-      mostrarMensaje("", "limpiar");
-    }
+    // Petición al Backend para comprobar el código OTP
+    function procesarVerificacionOTP() {
+      const code = document.getElementById('otp-input').value.trim();
+      const btn = document.getElementById('btn-verify');
 
-    function mostrarCarga(mostrar) {
-      if (mostrar) {
-        document.getElementById('loading').classList.remove('hidden');
-        document.getElementById('stepEmail').classList.add('pointer-events-none', 'opacity-50');
-        document.getElementById('step2FA').classList.add('pointer-events-none', 'opacity-50');
-      } else {
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('stepEmail').classList.remove('pointer-events-none', 'opacity-50');
-        document.getElementById('step2FA').classList.remove('pointer-events-none', 'opacity-50');
-      }
-    }
-
-    function mostrarMensaje(texto, tipo) {
-      const div = document.getElementById('statusMessage');
-      if (tipo === "limpiar") {
-        div.classList.add('hidden');
+      if (code.length < 6) {
+        showMessage("Por favor, ingresa los 6 dígitos.", true);
         return;
       }
-      div.innerText = texto;
-      div.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'border-red-200', 'bg-green-50', 'text-green-700', 'border-green-200');
-      if (tipo === "error") {
-        div.classList.add('bg-red-50', 'text-red-700', 'border', 'border-red-200');
-      } else if (tipo === "exito") {
-        div.classList.add('bg-green-50', 'text-green-700', 'border', 'border-green-200');
-      }
+
+      btn.disabled = true;
+      btn.innerText = "🪄 Rompiendo sello...";
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          btn.disabled = false;
+          btn.innerText = "🔑 Verificar Código";
+          
+          if (response.success) {
+            showMessage("¡Acceso mágico concedido! Redirigiendo...", false);
+            // Guardamos el token simulado de sesión en el cliente
+            sessionStorage.setItem('mia_session_token', response.token);
+            
+            // Aquí termina la Fase 1. El redireccionamiento o apertura de panel se gestionará en la Fase 3.
+            alert("¡Éxito! Lograste ingresar al sistema de manera segura. (Fase 1 completada con éxito)");
+          }
+        })
+        .withFailureHandler(function(error) {
+          btn.disabled = false;
+          btn.innerText = "🔑 Verificar Código";
+          showMessage(error.message, true);
+        })
+        .verificarOTP(code);
+    }
+
+    // Control de transiciones animadas
+    function transitionToScreen(fromId, toId) {
+      const fromEl = document.getElementById(fromId);
+      const toEl = document.getElementById(toId);
+
+      fromEl.classList.add('opacity-0');
+      setTimeout(() => {
+        fromEl.classList.add('hidden');
+        fromEl.classList.remove('block');
+        
+        toEl.classList.remove('hidden');
+        toEl.classList.add('block');
+        setTimeout(() => {
+          toEl.classList.remove('opacity-0');
+          toEl.classList.add('opacity-100');
+        }, 50);
+      }, 300);
+    }
+
+    function regresarAlLogin() {
+      transitionToScreen('screen-otp', 'screen-login');
+      document.getElementById('status-message').classList.add('hidden');
     }
   </script>
 </body>
