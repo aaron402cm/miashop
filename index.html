@@ -198,7 +198,7 @@
         <p class="text-xs text-gray-500">Introduce tu documento de identidad para conocer el estado actual y ver tus boletas.</p>
       </div>
 
-      <!-- Buscador de DNI Centrado y con Ancho Controlado (Sin desbordamientos) -->
+      <!-- Buscador de DNI Centrado y con Ancho Controlado -->
       <div class="bg-white p-6 rounded-3xl border border-purple-100 space-y-4 max-w-sm mx-auto shadow-sm">
         <div class="space-y-2">
           <label class="block text-xs font-bold text-[#7D5A94] uppercase text-center">Introduce tu DNI de Clienta</label>
@@ -238,18 +238,18 @@
 
   </main>
 
-  <!-- ==================== BARRA DE NAVEGACIÓN MÓVIL ==================== -->
+  <!-- ==================== BARRA DE NAVEGACIÓN MÓVIL (ANIMACIÓN ACELERADA A 150ms) ==================== -->
   <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-purple-100 shadow-xl z-40">
     <div class="max-w-4xl mx-auto flex justify-between items-center h-20 px-4 gap-2">
-      <button onclick="cambiarSeccion('catalogo')" id="nav-catalogo" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-300 ease-in-out">
+      <button onclick="cambiarSeccion('catalogo')" id="nav-catalogo" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out">
         <span class="text-xl">🏠</span>
         <span class="text-[9px] font-bold mt-1 uppercase">Catálogo</span>
       </button>
-      <button onclick="cambiarSeccion('carrito')" id="nav-carrito" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-300 ease-in-out">
+      <button onclick="cambiarSeccion('carrito')" id="nav-carrito" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out">
         <span class="text-xl">🛒</span>
         <span class="text-[9px] font-bold mt-1 uppercase">Mi Compra</span>
       </button>
-      <button onclick="cambiarSeccion('pedidos')" id="nav-pedidos" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-300 ease-in-out">
+      <button onclick="cambiarSeccion('pedidos')" id="nav-pedidos" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out">
         <span class="text-xl">🚚</span>
         <span class="text-[9px] font-bold mt-1 uppercase">Seguimiento</span>
       </button>
@@ -306,15 +306,16 @@
       </div>
       
       <div class="space-y-3">
+        <p class="text-xs text-gray-500 leading-relaxed text-center">Para completar tu orden, ingresa tu DNI. Sincronizaremos tus datos automáticamente.</p>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">DNI / RUC (Requerido)</label>
-          <input type="number" id="form-dni" placeholder="Ingresa tu documento de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all" required>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 text-center">DNI / RUC de Clienta</label>
+          <input type="number" id="form-dni" placeholder="Ingresa tu número de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider transition-all" required>
         </div>
       </div>
 
       <div class="flex gap-2 pt-3">
         <button onclick="cerrarModalCheckout()" class="flex-1 py-3.5 border border-purple-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50">Atrás</button>
-        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3.5 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
+        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
       </div>
     </div>
   </div>
@@ -371,6 +372,15 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL: ESPERA / PROCESANDO BOLETA (NUEVO) ==================== -->
+  <div id="modal-espera-boleta" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
+    <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center space-y-3 border border-purple-100">
+      <span class="text-4xl animate-spin inline-block">⏳</span>
+      <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Construyendo boleta...</h4>
+      <p class="text-xs text-gray-500 leading-relaxed">Estamos preparando tu boleta oficial. Unos segundos por favor. ✨</p>
+    </div>
+  </div>
+
   <!-- ==================== CÓDIGO JS INTEGRAL ==================== -->
   <script>
     // URL Web App de Google Apps Script
@@ -385,7 +395,8 @@
     let productoPorAgregar = null;
     let indexCarousel = 0;
     let intervalCarousel = null;
-    let mascotaTimer = null; // Temporizador global para la mascota
+    let mimiTimer = null; 
+    let audioCtxShared = null; // Motor de Audio compartido para evitar lag
 
     // 100 Frases de Refuerzo Positivo para la Mascota MIMI
     const frasesMascota = [
@@ -399,7 +410,7 @@
       "¡Una maravilla de elección! Este producto tiene un acabado único.",
       "¡Qué buena elección has hecho, te felicito de corazón!",
       "¡Perfecto! Un producto diseñado para deslumbrar.",
-      "¡Esto es una joya! Me hace muy feliz que lo lleves.",
+      "¡Esto es una joya! Me hace muy feliz que lo leves.",
       "¡Muy bien pensado! Es un artículo súper útil y hermoso.",
       "¡Qué estilo tienes! Tus elecciones siempre son de primer nivel.",
       "¡Es bellísimo! Te aseguro que recibirás muchos cumplidos.",
@@ -491,22 +502,13 @@
       "¡Excelente gusto! Me alegra que hayas encontrado este producto en MiaShop."
     ];
 
-    // Registrar Service Worker para soporte offline
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registrado con éxito', reg))
-          .catch(err => console.warn('No se pudo registrar el Service Worker', err));
-      });
-    }
-
     // Inicialización del catálogo
     document.addEventListener("DOMContentLoaded", () => {
       actualizarContadorCarrito();
       cargarCatalogoServidor();
       configurarUI();
       inicializarEfectoBanner(); 
-      cambiarSeccion('catalogo'); // Iniciar siempre en catálogo
+      cambiarSeccion('catalogo'); 
     });
 
     function configurarUI() {
@@ -537,13 +539,21 @@
       }, 2500);
     }
 
-    // ==================== SONIDOS SINTETIZADOS ====================
+    // ==================== MOTOR DE AUDIO COMPARTIDO (OPTIMIZACIÓN DE LAG) ====================
+    function getAudioContextShared() {
+      if (!audioCtxShared) {
+        audioCtxShared = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtxShared.state === 'suspended') {
+        audioCtxShared.resume();
+      }
+      return audioCtxShared;
+    }
+
     function playChime() {
       if (!soundEnabled) return;
       try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContext) return;
-        const ctx = new AudioContext();
+        const ctx = getAudioContextShared();
         const now = ctx.currentTime;
         const notas = [523.25, 659.25, 783.99, 1046.50];
         notas.forEach((freq, index) => {
@@ -562,14 +572,14 @@
           osc.stop(now + (index * 0.06) + 0.3);
         });
       } catch (e) {
-        console.warn("AudioContext no iniciado.");
+        console.warn("Fallo de audio sintetizado.");
       }
     }
 
     function playNavTap() {
       if (!soundEnabled) return;
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = getAudioContextShared();
         const now = ctx.currentTime;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -592,7 +602,7 @@
       if (soundEnabled) playChime();
     }
 
-    // ==================== CAMBIO DE PANTALLAS (SPA - CON ANIMACIONES DE TAMAÑO) ====================
+    // ==================== CAMBIO DE PANTALLAS (TRANSICIONES OPTIMIZADAS A 150ms) ====================
     function cambiarSeccion(seccionId) {
       playNavTap(); 
       
@@ -602,16 +612,14 @@
         document.getElementById('sec-' + id).classList.remove('block');
         
         const navBtn = document.getElementById('nav-' + id);
-        // Reducir tamaño de botones inactivos
-        navBtn.className = "flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-300 ease-in-out";
+        navBtn.className = "flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out";
       });
 
       document.getElementById('sec-' + seccionId).classList.remove('hidden');
       document.getElementById('sec-' + seccionId).classList.add('block');
       
       const actBtn = document.getElementById('nav-' + seccionId);
-      // Agrandar tamaño de botón seleccionado (flex-[1.4], escala y relieve)
-      actBtn.className = "flex-[1.4] flex flex-col items-center justify-center py-2.5 text-[#7D5D99] bg-purple-100/50 rounded-2xl font-extrabold scale-105 transition-all duration-300 ease-in-out shadow-inner border border-purple-100/20";
+      actBtn.className = "flex-[1.4] flex flex-col items-center justify-center py-2.5 text-[#7D5D99] bg-purple-100/50 rounded-2xl font-extrabold scale-105 transition-all duration-150 ease-in-out shadow-inner border border-purple-100/20";
 
       if (seccionId === 'carrito') {
         renderizarCarrito();
@@ -879,26 +887,28 @@
       mascota.classList.remove('hidden');
       mascota.style.opacity = '1';
       mascota.style.maxHeight = '300px';
+      mascota.style.margin = '';
+      mascota.style.padding = '';
 
       // Seleccionar frase alentadora
       const fraseAzar = frasesMascota[Math.floor(Math.random() * frasesMascota.length)];
       document.getElementById('mascota-frase').textContent = fraseAzar;
 
-      // Desaparecer la mascota suavemente tras 4 segundos para liberar pantalla
+      // Desaparecer la mascota suavemente tras 10 segundos
       if (window.mimiTimer) clearTimeout(window.mimiTimer);
       window.mimiTimer = setTimeout(() => {
-        mascota.style.transition = 'opacity 1s ease, max-height 1s ease, margin 1s ease';
+        mascota.style.transition = 'opacity 0.8s ease, max-height 0.8s ease, margin 0.8s ease';
         mascota.style.opacity = '0';
         mascota.style.maxHeight = '0px';
         mascota.style.margin = '0px';
         mascota.style.padding = '0px';
-        setTimeout(() => { mascota.classList.add('hidden'); }, 1000);
-      }, 10000); // 10 Segundos exactos
+        setTimeout(() => { mascota.classList.add('hidden'); }, 850);
+      }, 10000); 
 
       let subtotal = 0;
 
       carrito.forEach((item, index) => {
-        // Soporte robusto de lectura de propiedades en memoria
+        // Soporte de compatibilidad robusto
         const precio = parseFloat(item.precioVenta || item["Precio Venta"] || item.precio_venta || 0);
         const itemTotal = precio * item.cantidad;
         subtotal += itemTotal;
@@ -948,7 +958,7 @@
       renderizarCarrito();
     }
 
-    // ==================== MODAL DE CHECKOUT SIMPLIFICADO ====================
+    // ==================== CHECKOUT SIMPLIFICADO ====================
     function abrirModalCheckout() {
       const dniGuardado = localStorage.getItem('mia_lookup_dni');
       if (dniGuardado) {
@@ -1039,7 +1049,7 @@
       window.open(link, '_blank');
     }
 
-    // ==================== SEGUIMIENTO DE PEDIDOS (ESPACIADO OPTIMIZADO) ====================
+    // ==================== SEGUIMIENTO DE PEDIDOS ====================
     function consultarPedidosDNI() {
       const dni = document.getElementById('input-dni-consulta').value.trim();
       if (!dni) {
@@ -1134,7 +1144,7 @@
         });
       }
 
-      // Renderizar Historial y Boletas (Diseño ordenado y espaciado proporcional)
+      // Renderizar Historial y Boletas
       if (completados.length === 0) {
         historialContainer.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-4">No tienes boletas archivadas.</p>`;
       } else {
@@ -1160,7 +1170,7 @@
                 ${itemsHtml}
               </div>
 
-              <!-- Footer ordenado con espaciado libre -->
+              <!-- Footer ordenado con espaciado proporcional -->
               <div class="flex items-center justify-between pt-3 border-t border-emerald-100/50 gap-4">
                 <div>
                   <p class="text-[9px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
@@ -1178,11 +1188,20 @@
       }
     }
 
-    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES ====================
+    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES (CON POPUP DE ESPERA) ====================
     function abrirBoleta(idPedido) {
+      // 1. Mostrar ventana emergente de "Estamos construyendo tu boleta..."
+      const loaderEspera = document.getElementById('modal-espera-boleta');
+      loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
+      loaderEspera.classList.add('opacity-100');
+
       fetch(`${API_URL}?action=consultarPedidosDNI&dni=${localStorage.getItem('mia_lookup_dni')}`, { redirect: "follow" })
         .then(res => res.json())
         .then(response => {
+          // 2. Ocultar ventana emergente de espera
+          loaderEspera.classList.add('opacity-0', 'pointer-events-none');
+          loaderEspera.classList.remove('opacity-100');
+
           if (response.success) {
             const pedido = response.pedidos.find(p => p.id === idPedido);
             if (!pedido) return;
@@ -1206,6 +1225,11 @@
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100');
           }
+        })
+        .catch(() => {
+          loaderEspera.classList.add('opacity-0', 'pointer-events-none');
+          loaderEspera.classList.remove('opacity-100');
+          alert("Error de conexión al generar boleta.");
         });
     }
 
