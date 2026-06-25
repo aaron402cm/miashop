@@ -118,7 +118,7 @@
   <!-- Contenedor de Estrellas para el Modo Nocturno -->
   <div id="night-stars-container" class="fixed inset-0 z-0 pointer-events-none overflow-hidden hidden"></div>
 
-  <!-- ==================== HEADER (CON ICONO INTELIGENTE Y CARRITO COMPACTO) ==================== -->
+  <!-- ==================== HEADER ==================== -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -132,7 +132,6 @@
         <button onclick="toggleSonido()" id="btn-sonido" class="p-2 text-2xl hover:bg-purple-50 rounded-full transition-colors">
           🔊
         </button>
-        <!-- Carrito Compacto Circular sin Texto -->
         <button onclick="cambiarSeccion('carrito')" class="relative flex items-center justify-center bg-[#7D5A94] text-white w-12 h-12 rounded-full hover:bg-[#6a4c7e] transition-all">
           <span class="text-2xl">🛒</span>
           <span id="carrito-contador" class="absolute -top-1.5 -right-1.5 bg-[#F2846B] text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
@@ -147,7 +146,7 @@
     <!-- PANTALLA: CATÁLOGO -->
     <section id="sec-catalogo" class="space-y-6 block">
       
-      <!-- Banner de Bienvenida inteligente (Inicia con Texto, luego cambia a Diapositiva) -->
+      <!-- Banner de Bienvenida inteligente -->
       <div id="banner-principal" class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md flex items-center justify-center min-h-[140px] relative overflow-hidden transition-all duration-700">
         
         <!-- Vista Inicial: Texto "Importaciones MiaShop" -->
@@ -157,7 +156,7 @@
           <p class="text-base text-purple-100 max-w-sm mx-auto">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
         </div>
         
-        <!-- Vista Secundaria: Carrusel a Pantalla Completa (Se activa tras 2.5s) -->
+        <!-- Vista Secundaria: Carrusel a Pantalla Completa -->
         <div id="banner-vista-carousel" class="absolute inset-0 w-full h-full opacity-0 hidden transition-opacity duration-700">
           <img id="carousel-img" src="" class="w-full h-full object-cover fade-carousel-img" alt="Producto del catálogo">
           <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 flex items-end p-4">
@@ -247,7 +246,7 @@
         <p class="text-sm text-gray-500">Introduce tu documento de identidad para conocer el estado actual y ver tus boletas.</p>
       </div>
 
-      <!-- Buscador de DNI Centrado y con Ancho Controlado -->
+      <!-- Buscador de DNI Centrado -->
       <div class="bg-white p-6 rounded-3xl border border-purple-100 space-y-4 max-w-sm mx-auto shadow-sm">
         <div class="space-y-2">
           <label class="block text-sm font-bold text-[#7D5A94] uppercase text-center">Introduce tu DNI de Clienta</label>
@@ -323,7 +322,7 @@
       <!-- Miniaturas de Galería -->
       <div id="det-galeria-miniaturas" class="flex gap-2 overflow-x-auto pb-1 scrollbar-none"></div>
 
-      <!-- Detalles de Texto (Se ocultan si viene de "Mi Compra" / soloImagenes) -->
+      <!-- Detalles de Texto -->
       <div id="det-bloque-texto" class="space-y-2">
         <span id="det-sku-cat" class="text-xs font-bold text-[#7D5A94] uppercase tracking-widest"></span>
         <h3 id="det-nombre" class="font-magic text-2xl font-bold text-[#7D5A94] leading-tight"></h3>
@@ -430,18 +429,11 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL: ESPERA / PROCESANDO BOLETA ==================== -->
-  <div id="modal-espera-boleta" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
-    <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center space-y-3 border border-purple-100">
-      <span class="text-4xl animate-spin inline-block">⏳</span>
-      <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Estamos construyendo tu boleta...</h4>
-      <p class="text-sm text-gray-500 leading-relaxed">Por favor, espera unos segundos. ✨</p>
-    </div>
-  </div>
-
   <!-- ==================== CÓDIGO JS INTEGRAL ==================== -->
   <script>
-    // URL Web App de Google Apps Script
+    // =========================================================================
+    // ⚠️ REEMPLAZA ESTE ENLACE DE ABAJO CON TU URL DE APPS SCRIPT TERMINADA EN /exec
+    // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbyGMVq7Ricbcjy5Hcnwg2frnOr9MbsSelytAdI_YWEF4HAorDJfy_ZA5_BRGvdMO-ik/exec";
 
     // Variables de Estado de la Aplicación
@@ -609,6 +601,7 @@
 
     function generarEstrellasFondo() {
       const container = document.getElementById('night-stars-container');
+      if (!container) return;
       container.innerHTML = "";
       for (let i = 0; i < 40; i++) {
         const estrella = document.createElement('div');
@@ -733,37 +726,70 @@
       }
     }
 
-    // ==================== CONSUMO DE APPS SCRIPT ASÍNCRONO BLINDADO (SOLUCIONA CARGA) ====================
-    async function cargarCatalogoServidor() {
-      try {
-        const res = await fetch(`${API_URL}?action=obtenerCatalogo`, { redirect: "follow" });
-        const text = await res.text(); // Leer como texto crudo para evitar fallos silenciosos de JSON
-        
-        let response;
-        try {
-          response = JSON.parse(text);
-        } catch (jsonErr) {
-          console.error("La API no retornó un JSON estructurado. Respuesta recibida:", text);
-          alert("Error de Configuración: Tu Web App de Google Apps Script no tiene permisos de acceso público 'Cualquiera' (Anyone) o el enlace está mal configurado.");
-          return;
-        }
+    // ==================== LECTURA DE RED CLÁSICA COMPATIBLE (SOLUCIONA CARGA) ====================
+    function cargarCatalogoServidor() {
+      // Iniciar loader visible
+      document.getElementById('catalogo-cargando').classList.remove('hidden');
+      document.getElementById('catalogo-grid').classList.add('hidden');
 
-        if (response && response.success) {
-          catalogoProductos = response.productos || [];
-          categoriasLocal = response.categorias || [];
-          construirSelectorCategorias();
-          renderizarCatalogo();
-          iniciarCarruselBanner(); 
-        } else {
-          console.error("Error al obtener catálogo:", response ? response.error : "Sin respuesta");
-        }
-      } catch (err) {
-        console.error("Fallo de conexión API: ", err);
-      } finally {
-        // Bloque de garantía absoluto: ocultar cargador y revelar área
-        document.getElementById('catalogo-cargando').classList.add('hidden');
-        document.getElementById('catalogo-grid').classList.remove('hidden');
-      }
+      fetch(API_URL + "?action=obtenerCatalogo", { redirect: "follow" })
+        .then(res => {
+          return res.text(); // Leer como texto para diagnosticar errores de login
+        })
+        .then(text => {
+          let response;
+          try {
+            response = JSON.parse(text);
+          } catch (jsonErr) {
+            console.error("Respuesta no es JSON válido:", text);
+            alert("Atención: El enlace de tu Google Apps Script no devuelve datos válidos. Verifica en Google Sheets que autorizaste el acceso a 'Cualquiera' (Anyone) y no 'Solo yo'.");
+            return;
+          }
+
+          if (response && response.success) {
+            catalogoProductos = response.productos || [];
+            categoriasLocal = response.categorias || [];
+            construirSelectorCategorias();
+            renderizarCatalogo();
+            iniciarCarruselBanner();
+          } else {
+            console.error("Error retornado por servidor:", response ? response.error : "Sin datos");
+          }
+        })
+        .catch(err => {
+          console.error("Fallo de conexión de red:", err);
+          alert("Error de Red:\nNo se puede conectar con Google Apps Script. Asegúrate de haber reemplazado el enlace de prueba por tu URL real de Apps Script.");
+        })
+        .finally(() => {
+          // Desactivar el cargador
+          document.getElementById('catalogo-cargando').classList.add('hidden');
+          document.getElementById('catalogo-grid').classList.remove('hidden');
+        });
+    }
+
+    // ==================== CARRUSEL DINÁMICO DEL BANNER ====================
+    function iniciarCarruselBanner() {
+      if (!catalogoProductos || catalogoProductos.length === 0) return;
+      
+      const productosConImagenes = catalogoProductos.filter(p => p.imagen1);
+      if (productosConImagenes.length === 0) return;
+
+      const imgEl = document.getElementById('carousel-img');
+      if (!imgEl) return;
+      imgEl.src = productosConImagenes[0].imagen1;
+
+      if (intervalCarousel) clearInterval(intervalCarousel);
+
+      intervalCarousel = setInterval(() => {
+        imgEl.classList.add('fade-out-left');
+
+        setTimeout(() => {
+          indexCarousel = (indexCarousel + 1) % productosConImagenes.length;
+          imgEl.src = productosConImagenes[indexCarousel].imagen1;
+          imgEl.classList.remove('fade-out-left');
+        }, 800); 
+
+      }, 4000);
     }
 
     // ==================== RENDERIZACIÓN DE CATÁLOGO ====================
@@ -815,7 +841,7 @@
         
         let etiquetaHtml = "";
         
-        // Validación ultra-segura de SKU ante filas nulas o vacías
+        // Validación de SKU
         const skuStr = prod.sku ? String(prod.sku) : "";
         const idNum = parseInt(skuStr.replace("MIA-", "")) || 0;
         
@@ -962,14 +988,6 @@
       document.getElementById('carrito-contador').textContent = totalItems;
     }
 
-    function mostrarMensajeAlerta(texto) {
-      const alertDiv = document.createElement("div");
-      alertDiv.className = "fixed top-20 left-1/2 -translate-x-1/2 bg-[#7D5A94] text-white font-bold text-xs px-5 py-3 rounded-full shadow-lg z-50 animate-bounce";
-      alertDiv.textContent = texto;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 2500);
-    }
-
     // ==================== RENDERS DE CARRITO DE COMPRA ====================
     function renderizarCarrito() {
       const lista = document.getElementById('carrito-lista');
@@ -1022,7 +1040,7 @@
           <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4 animate-fadeIn">
             <div class="flex-1">
               <span class="text-xs font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
-              <!-- Clic en el nombre abre EXCLUSIVAMENTE la galería de fotos (soloImagenes = true) -->
+              <!-- Clic en el nombre abre la galería de fotos -->
               <h4 onclick="mostrarDetalleProducto('${item.sku}', true)" class="font-magic text-lg font-bold text-[#7D5D99] hover:underline cursor-pointer leading-snug">${item.nombre}</h4>
               <p class="text-base font-extrabold text-[#F2846B] mt-0.5">S/ ${precio.toFixed(2)} c/u</p>
             </div>
@@ -1121,7 +1139,6 @@
         .then(res => res.json())
         .then(response => {
           if (response.success) {
-            // Sincronizar el nombre real devuelto por la API
             pedidoDTO.nombreCliente = response.nombreCliente || "Clienta Nueva";
             generarEnlaceWhatsApp(pedidoDTO);
             
