@@ -287,6 +287,14 @@
 
   <!-- ==================== CÓDIGO JS INTEGRAL ==================== -->
   <script>
+    // Activar el Service Worker para permitir la instalación como App Móvil
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker registrado con éxito', reg))
+      .catch(err => console.warn('No se pudo registrar el Service Worker', err));
+  });
+}
     // URL Web App de Google Apps Script (Coloca tu URL de publicación aquí)
     const API_URL = "https://script.google.com/macros/s/AKfycbyGMVq7Ricbcjy5Hcnwg2frnOr9MbsSelytAdI_YWEF4HAorDJfy_ZA5_BRGvdMO-ik/exec";
 
