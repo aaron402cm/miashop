@@ -22,12 +22,13 @@
       font-family: 'Inter', sans-serif;
       background-color: #FDFBFD;
       -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.5s ease, color 0.5s ease;
     }
     .font-magic {
       font-family: 'Spectral', serif;
     }
     .btn-large {
-      min-height: 50px;
+      min-height: 54px;
     }
     .fade-carousel-img {
       transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
@@ -40,7 +41,8 @@
       opacity: 1;
       transform: scale(1);
     }
-    /* Burbuja de diálogo de la mascota orientada en la parte superior */
+    
+    /* Burbuja de diálogo de la mascota */
     .speech-bubble-top {
       position: relative;
       background: #ffffff;
@@ -68,32 +70,79 @@
       border-width: 10px;
       margin-left: -10px;
     }
+
+    /* ==================== MODO NOCTURNO: GALAXIA ==================== */
+    body.dark-mode {
+      background: linear-gradient(-45deg, #0a0118, #0d0221, #0a0118, #110133) !important;
+      color: #e0d0ff !important;
+    }
+    body.dark-mode header, body.dark-mode nav {
+      background-color: rgba(13, 2, 33, 0.96) !important;
+      border-color: rgba(201, 162, 39, 0.2) !important;
+    }
+    body.dark-mode .bg-white {
+      background-color: rgba(20, 5, 50, 0.88) !important;
+      color: #e0d0ff !important;
+      border-color: rgba(201, 162, 39, 0.2) !important;
+    }
+    body.dark-mode .border-purple-100, body.dark-mode .border-purple-200 {
+      border-color: rgba(125, 90, 148, 0.3) !important;
+    }
+    body.dark-mode p, body.dark-mode span, body.dark-mode h4, body.dark-mode label, body.dark-mode td {
+      color: #c8b8ee !important;
+    }
+    body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+      color: #e9d5ff !important;
+    }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+      background: rgba(30, 10, 60, 0.8) !important;
+      color: #e0d0ff !important;
+      border-color: rgba(125, 90, 148, 0.4) !important;
+    }
+    body.dark-mode .bg-purple-50\/40, body.dark-mode .bg-purple-50\/50 {
+      background-color: rgba(30, 10, 60, 0.4) !important;
+    }
+
+    /* Estrellas animadas */
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    .twinkle-star {
+      animation: twinkle 4s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="pb-24 text-gray-800">
 
-  <!-- ==================== HEADER ==================== -->
+  <!-- Contenedor de Estrellas para el Modo Nocturno -->
+  <div id="night-stars-container" class="fixed inset-0 z-0 pointer-events-none overflow-hidden hidden"></div>
+
+  <!-- ==================== HEADER (SOL/LUNA CONTROL DE MODO) ==================== -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-1">
-        <span class="text-2xl">✨</span>
+      <div class="flex items-center gap-1.5">
+        <!-- Icono inteligente para verificar/cambiar el modo nocturno -->
+        <button onclick="toggleModoNocturnoManual()" id="btn-modo-icon" class="text-2xl cursor-pointer select-none hover:scale-110 transition-transform" title="Cambiar Modo de Luz">
+          ☀️
+        </button>
         <h1 class="font-magic text-2xl font-bold text-[#7D5A94]">MiaShop</h1>
       </div>
       
       <div class="flex items-center gap-4">
-        <button onclick="toggleSonido()" id="btn-sonido" class="p-2 text-xl hover:bg-purple-50 rounded-full transition-colors" title="Activar/Desactivar Sonidos">
+        <button onclick="toggleSonido()" id="btn-sonido" class="p-2 text-xl hover:bg-purple-50 rounded-full transition-colors">
           🔊
         </button>
-        <button onclick="cambiarSeccion('carrito')" class="relative flex items-center gap-2 bg-[#7D5A94] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#6a4c7e] transition-colors">
+        <button onclick="cambiarSeccion('carrito')" class="relative flex items-center gap-2 bg-[#7D5A94] text-white px-4 py-2 rounded-full text-base font-semibold hover:bg-[#6a4c7e] transition-colors">
           <span>🛒 Mi Compra</span>
-          <span id="carrito-contador" class="bg-[#F2846B] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+          <span id="carrito-contador" class="bg-[#F2846B] text-white text-sm font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- ==================== CONTENEDOR PRINCIPAL ==================== -->
-  <main class="max-w-4xl mx-auto px-4 py-4">
+  <main class="max-w-4xl mx-auto px-4 py-4 relative z-10">
     
     <!-- PANTALLA: CATÁLOGO -->
     <section id="sec-catalogo" class="space-y-6 block">
@@ -105,14 +154,14 @@
         <div id="banner-vista-texto" class="text-center space-y-2 z-10 transition-opacity duration-700">
           <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">On-Demand</span>
           <h2 class="font-magic text-3xl font-bold">Importaciones Mágicas</h2>
-          <p class="text-sm text-purple-100 max-w-sm mx-auto">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
+          <p class="text-base text-purple-100 max-w-sm mx-auto">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
         </div>
         
         <!-- Vista Secundaria: Carrusel a Pantalla Completa (Se activa tras 2.5s) -->
         <div id="banner-vista-carousel" class="absolute inset-0 w-full h-full opacity-0 hidden transition-opacity duration-700">
           <img id="carousel-img" src="" class="w-full h-full object-cover fade-carousel-img" alt="Producto del catálogo">
           <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 flex items-end p-4">
-            <span class="bg-[#7D5A94] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm z-10 uppercase">✨ Tendencia MiaShop</span>
+            <span class="bg-[#7D5A94] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10 uppercase">✨ Tendencia MiaShop</span>
           </div>
         </div>
       </div>
@@ -121,19 +170,19 @@
       <div class="space-y-2">
         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Categorías de Productos</span>
         <div id="categorias-scroll" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <button onclick="filtrarCategoria('Todas')" class="cat-btn bg-[#7D5A94] text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-[#7D5A94]">Todas</button>
+          <button onclick="filtrarCategoria('Todas')" class="cat-btn bg-[#7D5A94] text-white px-5 py-2 rounded-full text-base font-semibold whitespace-nowrap border border-[#7D5A94]">Todas</button>
         </div>
       </div>
 
       <!-- Buscador Simple -->
       <div class="relative">
-        <input type="text" id="input-busqueda" oninput="filtrarPorBusqueda()" placeholder="🔍 Buscar por nombre de producto..." class="w-full px-5 py-4 rounded-2xl border-2 border-purple-100 focus:border-[#7D5A94] outline-none text-base font-medium shadow-sm transition-all">
+        <input type="text" id="input-busqueda" oninput="filtrarPorBusqueda()" placeholder="🔍 Buscar por nombre de producto..." class="w-full px-5 py-4 rounded-2xl border-2 border-purple-100 focus:border-[#7D5A94] outline-none text-lg font-medium shadow-sm transition-all">
       </div>
 
       <!-- Estado de carga -->
       <div id="catalogo-cargando" class="text-center py-10 space-y-3">
-        <span class="text-4xl animate-spin inline-block">🪄</span>
-        <p class="text-sm text-gray-500 font-medium">Consultando el catálogo con Apps Script...</p>
+        <span class="text-5xl animate-spin inline-block">🪄</span>
+        <p class="text-base text-gray-500 font-medium">Consultando el catálogo con Apps Script...</p>
       </div>
 
       <!-- Rejilla de Productos -->
@@ -144,19 +193,19 @@
     <section id="sec-carrito" class="space-y-6 hidden">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-purple-100 pb-4 gap-4">
         <h2 class="font-magic text-2xl font-bold text-[#7D5A94]">📋 Mi Carrito de Compras</h2>
-        <button onclick="vaciarCarrito()" class="text-xs text-red-500 hover:underline font-semibold text-left">Vaciar Carrito</button>
+        <button onclick="vaciarCarrito()" class="text-sm text-red-500 hover:underline font-semibold text-left">Vaciar Carrito</button>
       </div>
 
       <!-- Mascota MIMI Compacta (Mensaje ARRIBA del gatito - Temporizada a 10s) -->
       <div id="mascota-contenedor" class="flex flex-col items-center justify-center py-2 max-w-sm mx-auto hidden transition-all duration-700 overflow-hidden">
         <!-- Burbuja de diálogo arriba -->
-        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
+        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-sm font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
           <span id="mascota-frase">¡Qué excelente elección! Es uno de nuestros favoritos.</span>
         </div>
         <!-- Gatito abajo -->
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <span class="text-4xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
-          <span class="text-[9px] font-extrabold text-purple-400">MIMI</span>
+          <span class="text-5xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
+          <span class="text-xs font-extrabold text-purple-400">MIMI</span>
         </div>
       </div>
 
@@ -165,18 +214,18 @@
 
       <!-- Detalle de Importes -->
       <div id="carrito-totales" class="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 space-y-3 hidden">
-        <div class="flex justify-between items-center text-sm font-medium text-gray-500">
+        <div class="flex justify-between items-center text-base font-medium text-gray-500">
           <span>Subtotal estimado</span>
           <span id="totales-subtotal">S/ 0.00</span>
         </div>
-        <div class="flex justify-between items-center text-lg font-bold text-gray-800 border-t border-purple-100 pt-3">
+        <div class="flex justify-between items-center text-xl font-bold text-gray-800 border-t border-purple-100 pt-3">
           <span>Total a Pagar</span>
           <span id="totales-total" class="text-[#F2846B]">S/ 0.00</span>
         </div>
         
         <!-- Botón de Registro de Pedido -->
         <div class="pt-4">
-          <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-base py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
+          <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-lg py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
             ✨ Registrar mi Pedido y continuar
           </button>
         </div>
@@ -185,9 +234,9 @@
       <!-- Estado Carrito Vacío -->
       <div id="carrito-vacio" class="text-center py-16 space-y-4">
         <span class="text-6xl">🛍️</span>
-        <h3 class="font-magic text-xl font-bold text-gray-500">Tu cesta está vacía</h3>
-        <p class="text-sm text-gray-400">Regresa al catálogo y selecciona tus productos favoritos.</p>
-        <button onclick="cambiarSeccion('catalogo')" class="bg-[#7D5A94] text-white px-6 py-3 rounded-full text-sm font-semibold shadow">Ir a Ver Productos</button>
+        <h3 class="font-magic text-2xl font-bold text-gray-500">Tu cesta está vacía</h3>
+        <p class="text-base text-gray-400">Regresa al catálogo y selecciona tus productos favoritos.</p>
+        <button onclick="cambiarSeccion('catalogo')" class="bg-[#7D5A94] text-white px-6 py-3 rounded-full text-base font-semibold shadow">Ir a Ver Productos</button>
       </div>
     </section>
 
@@ -195,24 +244,24 @@
     <section id="sec-pedidos" class="space-y-6 hidden">
       <div class="border-b border-purple-100 pb-4">
         <h2 class="font-magic text-2xl font-bold text-[#7D5A94]">🚚 Consulta de Pedidos</h2>
-        <p class="text-xs text-gray-500">Introduce tu documento de identidad para conocer el estado actual y ver tus boletas.</p>
+        <p class="text-sm text-gray-500">Introduce tu documento de identidad para conocer el estado actual y ver tus boletas.</p>
       </div>
 
       <!-- Buscador de DNI Centrado y con Ancho Controlado -->
       <div class="bg-white p-6 rounded-3xl border border-purple-100 space-y-4 max-w-sm mx-auto shadow-sm">
         <div class="space-y-2">
-          <label class="block text-xs font-bold text-[#7D5A94] uppercase text-center">Introduce tu DNI de Clienta</label>
+          <label class="block text-sm font-bold text-[#7D5A94] uppercase text-center">Introduce tu DNI de Clienta</label>
           <div class="flex flex-col gap-2">
             <input type="number" id="input-dni-consulta" placeholder="Ej: 45678912" class="w-full px-4 py-3 rounded-xl border border-purple-200 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider">
-            <button onclick="consultarPedidosDNI()" class="w-full bg-[#7D5A94] hover:bg-[#68497d] text-white px-6 py-3.5 rounded-xl font-semibold transition-colors btn-large text-sm">Consultar Pedido</button>
+            <button onclick="consultarPedidosDNI()" class="w-full bg-[#7D5A94] hover:bg-[#68497d] text-white px-6 py-3.5 rounded-xl font-semibold transition-colors btn-large text-base">Consultar Pedido</button>
           </div>
         </div>
       </div>
 
       <!-- Loader de Consulta -->
       <div id="consulta-loader" class="text-center py-12 hidden">
-        <span class="text-3xl animate-spin inline-block">🔮</span>
-        <p class="text-xs text-gray-400 mt-2">Buscando tus pedidos en el pergamino...</p>
+        <span class="text-5xl animate-spin inline-block">🔮</span>
+        <p class="text-sm text-gray-400 mt-2">Buscando tus pedidos en el pergamino...</p>
       </div>
 
       <!-- Lista de Pedidos Encontrados -->
@@ -220,49 +269,49 @@
         
         <!-- Pedidos Activos -->
         <div class="space-y-4">
-          <h3 class="font-magic text-lg font-bold text-[#7D5A94] border-b pb-2 flex items-center gap-2">⏳ Pedidos Activos</h3>
+          <h3 class="font-magic text-xl font-bold text-[#7D5A94] border-b pb-2 flex items-center gap-2">⏳ Pedidos Activos</h3>
           <div id="lista-pedidos-activos" class="space-y-6"></div>
         </div>
 
         <!-- Historial y Boletas -->
         <div class="space-y-4">
-          <h3 class="font-magic text-lg font-bold text-emerald-800 border-b pb-2 flex items-center gap-2">📜 Historial y Boletas Archivadas</h3>
+          <h3 class="font-magic text-xl font-bold text-emerald-800 border-b pb-2 flex items-center gap-2">📜 Historial y Boletas Archivadas</h3>
           <div id="lista-pedidos-historial" class="space-y-4"></div>
         </div>
       </div>
       
-      <div id="consulta-vacio" class="text-center py-10 border border-dashed border-purple-200 rounded-3xl text-gray-400 italic text-sm hidden">
+      <div id="consulta-vacio" class="text-center py-10 border border-dashed border-purple-200 rounded-3xl text-gray-400 italic text-base hidden">
         No se encontraron pedidos vigentes ni boletas archivadas bajo este DNI.
       </div>
     </section>
 
   </main>
 
-  <!-- ==================== BARRA DE NAVEGACIÓN MÓVIL (ANIMACIÓN ACELERADA A 150ms) ==================== -->
+  <!-- ==================== BARRA DE NAVEGACIÓN MÓVIL ==================== -->
   <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-purple-100 shadow-xl z-40">
     <div class="max-w-4xl mx-auto flex justify-between items-center h-20 px-4 gap-2">
       <button onclick="cambiarSeccion('catalogo')" id="nav-catalogo" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out">
-        <span class="text-xl">🏠</span>
-        <span class="text-[9px] font-bold mt-1 uppercase">Catálogo</span>
+        <span class="text-2xl">🏠</span>
+        <span class="text-xs font-bold mt-1 uppercase">Catálogo</span>
       </button>
       <button onclick="cambiarSeccion('carrito')" id="nav-carrito" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out">
-        <span class="text-xl">🛒</span>
-        <span class="text-[9px] font-bold mt-1 uppercase">Mi Compra</span>
+        <span class="text-2xl">🛒</span>
+        <span class="text-xs font-bold mt-1 uppercase">Mi Compra</span>
       </button>
       <button onclick="cambiarSeccion('pedidos')" id="nav-pedidos" class="flex-1 flex flex-col items-center justify-center py-2 text-gray-400 hover:text-[#7D5A94] scale-95 transition-all duration-150 ease-in-out">
-        <span class="text-xl">🚚</span>
-        <span class="text-[9px] font-bold mt-1 uppercase">Seguimiento</span>
+        <span class="text-2xl">🚚</span>
+        <span class="text-xs font-bold mt-1 uppercase">Seguimiento</span>
       </button>
     </div>
   </nav>
 
-  <!-- ==================== MODAL: DETALLES DE PRODUCTO ==================== -->
+  <!-- ==================== MODAL: DETALLES DE PRODUCTO (CORREGIDO GALERÍA CON FLAGS) ==================== -->
   <div id="modal-detalle-producto" class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 border border-purple-100 max-h-[90vh] overflow-y-auto">
       
       <!-- Cabecera modal de detalles -->
       <div class="flex justify-between items-center border-b pb-3 border-purple-100">
-        <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Detalles del Producto</h4>
+        <h4 id="det-modal-titulo" class="font-magic text-xl font-bold text-[#7D5A94]">Detalles del Producto</h4>
         <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">&times;</button>
       </div>
 
@@ -274,23 +323,23 @@
       <!-- Miniaturas de Galería -->
       <div id="det-galeria-miniaturas" class="flex gap-2 overflow-x-auto pb-1 scrollbar-none"></div>
 
-      <!-- Detalles de Texto -->
-      <div class="space-y-2">
-        <span id="det-sku-cat" class="text-[10px] font-bold text-[#7D5A94] uppercase tracking-widest"></span>
+      <!-- Detalles de Texto (Se ocultan si viene de "Mi Compra" / soloImagenes) -->
+      <div id="det-bloque-texto" class="space-y-2">
+        <span id="det-sku-cat" class="text-xs font-bold text-[#7D5A94] uppercase tracking-widest"></span>
         <h3 id="det-nombre" class="font-magic text-2xl font-bold text-[#7D5A94] leading-tight"></h3>
         <p id="det-precio" class="text-2xl font-extrabold text-[#F2846B]"></p>
-        <div class="border-t border-purple-50 pt-2">
+        <div id="det-descripcion-bloque" class="border-t border-purple-50 pt-2">
           <p class="text-xs font-bold text-gray-400 uppercase mb-1">Descripción</p>
-          <p id="det-descripcion" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line"></p>
+          <p id="det-descripcion" class="text-base text-gray-600 leading-relaxed whitespace-pre-line"></p>
         </div>
       </div>
 
       <!-- Botonera de Compra y Botón de Regresar Ampliado -->
       <div class="flex gap-3 pt-2">
-        <button onclick="cerrarModalDetalle()" class="flex-1 py-3.5 border border-purple-200 text-[#7D5A94] rounded-xl font-bold text-sm bg-purple-50 hover:bg-purple-100 transition-colors">
+        <button onclick="cerrarModalDetalle()" class="flex-1 py-3.5 border border-purple-200 text-[#7D5A94] rounded-xl font-bold text-base bg-purple-50 hover:bg-purple-100 transition-colors btn-large">
           ⬅️ Regresar
         </button>
-        <button id="det-btn-comprar" class="flex-1 py-3.5 bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-sm rounded-xl transition-all shadow-md">
+        <button id="det-btn-comprar" class="flex-1 py-3.5 bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-base rounded-xl transition-all shadow-md btn-large">
           🛒 Comprar
         </button>
       </div>
@@ -306,16 +355,16 @@
       </div>
       
       <div class="space-y-3">
-        <p class="text-xs text-gray-500 leading-relaxed text-center">Para completar tu orden, ingresa tu DNI. Sincronizaremos tus datos automáticamente.</p>
+        <p class="text-sm text-gray-500 leading-relaxed text-center font-medium">Para completar tu orden, ingresa tu DNI. Sincronizaremos tus datos automáticamente.</p>
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 text-center">DNI / RUC de Clienta</label>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1 text-center">DNI / RUC de Clienta</label>
           <input type="number" id="form-dni" placeholder="Ingresa tu número de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider transition-all" required>
         </div>
       </div>
 
       <div class="flex gap-2 pt-3">
-        <button onclick="cerrarModalCheckout()" class="flex-1 py-3.5 border border-purple-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50">Atrás</button>
-        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
+        <button onclick="cerrarModalCheckout()" class="flex-1 py-3.5 border border-purple-200 text-gray-500 rounded-xl font-semibold text-base hover:bg-gray-50">Atrás</button>
+        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-base hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
       </div>
     </div>
   </div>
@@ -326,11 +375,11 @@
       <div class="text-center">
         <span class="text-5xl">🛍️</span>
         <h4 class="font-magic text-xl font-bold text-[#7D5A94] mt-2">¿Confirmamos la selección?</h4>
-        <p class="text-xs text-gray-500 mt-1 leading-relaxed">¿Deseas agregar <span id="conf-prod-nombre" class="font-bold text-gray-800"></span> a tu pedido?</p>
+        <p class="text-sm text-gray-500 mt-1 leading-relaxed">¿Deseas agregar <span id="conf-prod-nombre" class="font-bold text-gray-800"></span> a tu pedido?</p>
       </div>
       <div class="flex gap-3">
-        <button onclick="cerrarModalConfirmacion()" class="flex-1 py-3 border border-purple-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors">Cancelar</button>
-        <button id="btn-confirmar-add" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Sí, agregar</button>
+        <button onclick="cerrarModalConfirmacion()" class="flex-1 py-3 border border-purple-200 text-gray-500 rounded-xl font-semibold text-base hover:bg-gray-50 transition-colors">Cancelar</button>
+        <button id="btn-confirmar-add" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-base hover:bg-[#e0725a] transition-colors shadow-sm">Sí, agregar</button>
       </div>
     </div>
   </div>
@@ -377,7 +426,7 @@
     <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center space-y-3 border border-purple-100">
       <span class="text-4xl animate-spin inline-block">⏳</span>
       <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Estamos construyendo tu boleta...</h4>
-      <p class="text-xs text-gray-500 leading-relaxed">Por favor, espera unos segundos. ✨</p>
+      <p class="text-sm text-gray-500 leading-relaxed">Por favor, espera unos segundos. ✨</p>
     </div>
   </div>
 
@@ -396,7 +445,8 @@
     let indexCarousel = 0;
     let intervalCarousel = null;
     let mimiTimer = null; 
-    let audioCtxShared = null; // Motor de Audio compartido para evitar lag
+    let audioCtxShared = null; 
+    let modoNocturnoManual = localStorage.getItem('mia_modo_nocturno_manual'); // 'day', 'night' o null
 
     // 100 Frases de Refuerzo Positivo para la Mascota MIMI
     const frasesMascota = [
@@ -410,7 +460,7 @@
       "¡Una maravilla de elección! Este producto tiene un acabado único.",
       "¡Qué buena elección has hecho, te felicito de corazón!",
       "¡Perfecto! Un producto diseñado para deslumbrar.",
-      "¡Esto es una joya! Me hace muy feliz que lo lleves.",
+      "¡Esto es una joda de buen gusto! Te hace muy feliz que lo leves.",
       "¡Muy bien pensado! Es un artículo súper útil y hermoso.",
       "¡Qué estilo tienes! Tus elecciones siempre son de primer nivel.",
       "¡Es bellísimo! Te aseguro que recibirás muchos cumplidos.",
@@ -474,7 +524,7 @@
       "¡Muy inteligente de tu parte elegir este producto hoy!",
       "¡Qué selección tan sobresaliente! Has escogido con sabiduría.",
       "¡Un aplauso para tu carrito de compras! Excelente combinación.",
-      "¡Es una verdadera joya! Te aseguro que querrás pedir otro pronto.",
+      "¡Es una verdadera joda de buen gusto! Te aseguro que querrás pedir otro pronto.",
       "¡Qué decisión tan acertada! Un producto sumamente elegante.",
       "¡Maravillosa elección! Un producto lleno de detalles encantadores.",
       "¡Una compra fantástica! Es de lo más duradero y fino que tenemos.",
@@ -502,27 +552,62 @@
       "¡Excelente gusto! Me alegra que hayas encontrado este producto en MiaShop."
     ];
 
-    // Registrar Service Worker para soporte offline
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registrado con éxito', reg))
-          .catch(err => console.warn('No se pudo registrar el Service Worker', err));
-      });
+    // ==================== SISTEMA AUTOMÁTICO/MANUAL DE MODO NOCTURNO ====================
+    function verificarModoNocturnoAutomatico() {
+      if (modoNocturnoManual !== null) {
+        aplicarModoNocturno(modoNocturnoManual === 'night');
+        return;
+      }
+
+      const hora = new Date().getHours();
+      // Activar automáticamente de 19:00 (7 PM) a 06:00 (6 AM)
+      const esNocturno = (hora >= 19 || hora < 6);
+      aplicarModoNocturno(esNocturno);
     }
 
-    // Inicialización del catálogo
-    document.addEventListener("DOMContentLoaded", () => {
-      actualizarContadorCarrito();
-      cargarCatalogoServidor();
-      configurarUI();
-      inicializarEfectoBanner(); 
-      cambiarSeccion('catalogo'); 
-    });
+    function aplicarModoNocturno(activar) {
+      const body = document.body;
+      const btnIcon = document.getElementById('btn-modo-icon');
+      const starsContainer = document.getElementById('night-stars-container');
 
-    function configurarUI() {
-      const btn = document.getElementById('btn-sonido');
-      btn.textContent = soundEnabled ? '🔊' : '🔇';
+      if (activar) {
+        body.classList.add('dark-mode');
+        btnIcon.textContent = '🌙'; 
+        starsContainer.classList.remove('hidden');
+        generarEstrellasFondo();
+      } else {
+        body.classList.remove('dark-mode');
+        btnIcon.textContent = '☀️'; 
+        starsContainer.classList.add('hidden');
+        starsContainer.innerHTML = "";
+      }
+    }
+
+    function toggleModoNocturnoManual() {
+      playNavTap();
+      const esNocturnoActual = document.body.classList.contains('dark-mode');
+      const nuevoModo = !esNocturnoActual;
+      
+      modoNocturnoManual = nuevoModo ? 'night' : 'day';
+      localStorage.setItem('mia_modo_nocturno_manual', modoNocturnoManual);
+      
+      aplicarModoNocturno(nuevoModo);
+    }
+
+    function generarEstrellasFondo() {
+      const container = document.getElementById('night-stars-container');
+      container.innerHTML = "";
+      for (let i = 0; i < 40; i++) {
+        const estrella = document.createElement('div');
+        estrella.className = 'twinkle-star absolute bg-white rounded-full opacity-60';
+        const size = Math.random() * 2 + 0.5;
+        estrella.style.width = size + 'px';
+        estrella.style.height = size + 'px';
+        estrella.style.top = Math.random() * 100 + '%';
+        estrella.style.left = Math.random() * 100 + '%';
+        estrella.style.animationDelay = (Math.random() * 4) + 's';
+        container.appendChild(estrella);
+      }
     }
 
     // ==================== EFECTO INTELIGENTE DEL BANNER ====================
@@ -548,7 +633,7 @@
       }, 2500);
     }
 
-    // ==================== MOTOR DE AUDIO COMPARTIDO (OPTIMIZACIÓN DE LAG) ====================
+    // ==================== MOTOR DE AUDIO COMPARTIDO ====================
     function getAudioContextShared() {
       if (!audioCtxShared) {
         audioCtxShared = new (window.AudioContext || window.webkitAudioContext)();
@@ -686,12 +771,12 @@
     // ==================== RENDERIZACIÓN DE CATÁLOGO ====================
     function construirSelectorCategorias() {
       const container = document.getElementById('categorias-scroll');
-      container.innerHTML = `<button onclick="filtrarCategoria('Todas')" class="cat-btn px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-[#7D5A94] ${categoriaSeleccionada === 'Todas' ? 'bg-[#7D5A94] text-white' : 'bg-white text-[#7D5A94]'}">Todas</button>`;
+      container.innerHTML = `<button onclick="filtrarCategoria('Todas')" class="cat-btn px-5 py-2 rounded-full text-base font-semibold whitespace-nowrap border border-[#7D5A94] ${categoriaSeleccionada === 'Todas' ? 'bg-[#7D5A94] text-white' : 'bg-white text-[#7D5A94]'}">Todas</button>`;
       
       categoriasLocal.forEach(cat => {
         const activo = categoriaSeleccionada === cat;
         container.innerHTML += `
-          <button onclick="filtrarCategoria('${cat}')" class="cat-btn px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-[#7D5A94] ${activo ? 'bg-[#7D5A94] text-white' : 'bg-white text-[#7D5A94]'}">${cat}</button>
+          <button onclick="filtrarCategoria('${cat}')" class="cat-btn px-5 py-2 rounded-full text-base font-semibold whitespace-nowrap border border-[#7D5A94] ${activo ? 'bg-[#7D5A94] text-white' : 'bg-white text-[#7D5A94]'}">${cat}</button>
         `;
       });
     }
@@ -706,6 +791,7 @@
       renderizarCatalogo();
     }
 
+    // ==================== RENDERIZACIÓN DE PRODUCTOS EN CATÁLOGO ====================
     function renderizarCatalogo() {
       const grid = document.getElementById('catalogo-grid');
       const query = document.getElementById('input-busqueda').value.toLowerCase().trim();
@@ -733,11 +819,11 @@
         let etiquetaHtml = "";
         const idNum = parseInt(prod.sku.replace("MIA-", ""));
         if (idNum % 3 === 0) {
-          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#F2846B] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">🔥 Oferta</span>`;
+          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#F2846B] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">🔥 Oferta</span>`;
         } else if (idNum % 5 === 0) {
-          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#D4AF37] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">⭐ Destacado</span>`;
+          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#D4AF37] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">⭐ Destacado</span>`;
         } else {
-          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#7D5A94] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">✨ Nuevo</span>`;
+          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#7D5A94] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">✨ Nuevo</span>`;
         }
 
         const card = `
@@ -747,12 +833,12 @@
                 ${etiquetaHtml}
                 <img src="${img}" class="w-full h-full object-cover">
               </div>
-              <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${prod.sku} | ${prod.categoria}</span>
-              <h3 class="font-magic text-lg font-bold text-[#7D5A94] mt-0.5 leading-tight">${prod.nombre}</h3>
+              <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${prod.sku} | ${prod.categoria}</span>
+              <h3 class="font-magic text-xl font-bold text-[#7D5A94] mt-0.5 leading-tight">${prod.nombre}</h3>
             </div>
             <div class="mt-4 border-t border-purple-50/50 pt-3 flex items-center justify-between">
               <div class="flex flex-col">
-                <span class="text-[9px] text-gray-400 uppercase font-semibold">Precio S/</span>
+                <span class="text-xs text-gray-400 uppercase font-semibold">Precio S/</span>
                 <span class="text-xl font-extrabold text-[#F2846B]">S/ ${parseFloat(prod.precioVenta).toFixed(2)}</span>
               </div>
               <button onclick="event.stopPropagation(); solicitarAgregarAlCarrito('${prod.sku}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-colors">
@@ -765,15 +851,29 @@
       });
     }
 
-    // ==================== DETALLES DE PRODUCTO ====================
-    function mostrarDetalleProducto(sku) {
+    // ==================== DETALLES DE PRODUCTO (CORREGIDO GALERÍA CON FLAGS) ====================
+    function mostrarDetalleProducto(sku, soloImagenes = false) {
       const prod = catalogoProductos.find(p => p.sku === sku);
       if (!prod) return;
 
-      document.getElementById('det-nombre').textContent = prod.nombre;
-      document.getElementById('det-sku-cat').textContent = `${prod.sku} | ${prod.categoria}`;
-      document.getElementById('det-precio').textContent = `S/ ${parseFloat(prod.precioVenta).toFixed(2)}`;
-      document.getElementById('det-descripcion').textContent = prod.descripcion || "Sin descripción por el momento.";
+      const txtBloque = document.getElementById('det-bloque-texto');
+      const btnComprar = document.getElementById('det-btn-comprar');
+      const modalTitulo = document.getElementById('det-modal-titulo');
+
+      if (soloImagenes) {
+        modalTitulo.textContent = "Imágenes del Producto";
+        txtBloque.classList.add('hidden');
+        btnComprar.classList.add('hidden');
+      } else {
+        modalTitulo.textContent = "Detalles del Producto";
+        txtBloque.classList.remove('hidden');
+        btnComprar.classList.remove('hidden');
+
+        document.getElementById('det-nombre').textContent = prod.nombre;
+        document.getElementById('det-sku-cat').textContent = `${prod.sku} | ${prod.categoria}`;
+        document.getElementById('det-precio').textContent = `S/ ${parseFloat(prod.precioVenta).toFixed(2)}`;
+        document.getElementById('det-descripcion').textContent = prod.descripcion || "Sin descripción por el momento.";
+      }
 
       const imgPrincipal = document.getElementById('det-img-principal');
       imgPrincipal.src = prod.imagen1 || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=250';
@@ -786,14 +886,10 @@
       if (imagenes.length > 1) {
         imagenes.forEach(img => {
           miniaturasContainer.innerHTML += `
-            <img src="${img}" onclick="cambiarImagenDetalle('${img}')" class="w-12 h-12 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-[#7D5A94] flex-shrink-0 transition-all">
+            <img src="${img}" onclick="cambiarImagenDetalle('${img}')" class="w-14 h-14 rounded-lg object-cover cursor-pointer border-2 border-transparent hover:border-[#7D5A94] flex-shrink-0 transition-all">
           `;
         });
       }
-
-      document.getElementById('det-btn-comprar').onclick = () => {
-        solicitarAgregarAlCarrito(sku);
-      };
 
       const modal = document.getElementById('modal-detalle-producto');
       modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -873,7 +969,7 @@
       setTimeout(() => alertDiv.remove(), 2500);
     }
 
-    // ==================== RENDERS DE CARRITO DE COMPRA (MIMI TEMPORIZADA A 10 SEGUNDOS) ====================
+    // ==================== RENDERS DE CARRITO DE COMPRA ====================
     function renderizarCarrito() {
       const lista = document.getElementById('carrito-lista');
       const totales = document.getElementById('carrito-totales');
@@ -917,23 +1013,22 @@
       let subtotal = 0;
 
       carrito.forEach((item, index) => {
-        // Soporte de compatibilidad robusto
         const precio = parseFloat(item.precioVenta || item["Precio Venta"] || item.precio_venta || 0);
         const itemTotal = precio * item.cantidad;
         subtotal += itemTotal;
 
         const row = `
-          <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4 animate-fadeIn">
             <div class="flex-1">
-              <span class="text-[9px] font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
-              <!-- Clic en el nombre para abrir detalles con fotos -->
-              <h4 onclick="mostrarDetalleProducto('${item.sku}')" class="font-magic text-base font-bold text-[#7D5D99] hover:underline cursor-pointer leading-snug">${item.nombre}</h4>
-              <p class="text-sm font-extrabold text-[#F2846B] mt-0.5">S/ ${precio.toFixed(2)} c/u</p>
+              <span class="text-xs font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
+              <!-- Clic en el nombre abre EXCLUSIVAMENTE la galería de fotos (soloImagenes = true) -->
+              <h4 onclick="mostrarDetalleProducto('${item.sku}', true)" class="font-magic text-lg font-bold text-[#7D5D99] hover:underline cursor-pointer leading-snug">${item.nombre}</h4>
+              <p class="text-base font-extrabold text-[#F2846B] mt-0.5">S/ ${precio.toFixed(2)} c/u</p>
             </div>
             
             <div class="flex items-center gap-2">
               <button onclick="modificarCantidadItem(${index}, -1)" class="w-8 h-8 rounded-full border border-purple-200 flex items-center justify-center font-bold text-gray-600 hover:bg-purple-50">-</button>
-              <span class="w-8 text-center text-sm font-bold text-gray-800">${item.cantidad}</span>
+              <span class="w-8 text-center text-base font-bold text-gray-800">${item.cantidad}</span>
               <button onclick="modificarCantidadItem(${index}, 1)" class="w-8 h-8 rounded-full border border-purple-200 flex items-center justify-center font-bold text-gray-600 hover:bg-purple-50">+</button>
             </div>
 
@@ -960,6 +1055,14 @@
       renderizarCarrito();
     }
 
+    function vaciarCarrito() {
+      if (!confirm("¿Deseas quitar todos los productos de tu pedido?")) return;
+      carrito = [];
+      localStorage.removeItem('mia_catalog_cart');
+      actualizarContadorCarrito();
+      renderizarCarrito();
+    }
+
     // ==================== CHECKOUT SIMPLIFICADO ====================
     function abrirModalCheckout() {
       const dniGuardado = localStorage.getItem('mia_lookup_dni');
@@ -978,7 +1081,7 @@
       modal.classList.remove('opacity-100');
     }
 
-    // ==================== ENVÍO AUTOMÁTICO A APPS SCRIPT (CORS) ====================
+    // ==================== ENVÍO AUTOMÁTICO A APPS SCRIPT ====================
     function procesarConfirmacionPedido() {
       const dni = document.getElementById('form-dni').value.trim();
 
@@ -1037,9 +1140,9 @@
         });
     }
 
-    // ==================== FORMATO AMIGABLE PARA MENSAJE WHATSAPP ====================
+    // ==================== FORMATO DE WHATSAPP AMIGABLE Y ORDENADO ====================
     function generarEnlaceWhatsApp(pedido) {
-      const numeroCelularAdmin = "51923934517"; // Tu número real de MiaShop
+      const numeroCelularAdmin = "51983663828"; // Tu número real de MiaShop
       let listaTexto = "";
       pedido.detalleProductos.forEach(i => {
         listaTexto += `• *${i.nombre}* (Cant: ${i.cantidad})\n`;
@@ -1103,7 +1206,7 @@
 
       // Renderizar Pedidos Activos
       if (activos.length === 0) {
-        activosContainer.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-4">No tienes pedidos en progreso de despacho.</p>`;
+        activosContainer.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-4">No tienes pedidos en progreso de despacho.</p>`;
       } else {
         activos.forEach(p => {
           let listaHtml = "";
@@ -1128,7 +1231,7 @@
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${circuloColor}">
                   ${i + 1}
                 </div>
-                <span class="text-[10px] mt-1 ${etiquetaColor}">${f === 'Pendiente' ? 'Compra ⌛' : f === 'En Proceso' ? 'Empaque 📦' : 'En Ruta 🚚'}</span>
+                <span class="text-xs mt-1 ${etiquetaColor}">${f === 'Pendiente' ? 'Compra ⌛' : f === 'En Proceso' ? 'Empaque 📦' : 'En Ruta 🚚'}</span>
               </div>
             `;
           });
@@ -1136,11 +1239,11 @@
 
           const card = `
             <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3 animate-fadeIn">
-              <div class="flex justify-between items-center border-b pb-2 text-xs">
+              <div class="flex justify-between items-center border-b pb-2 text-sm">
                 <span class="font-bold text-[#7D5A94]">ID: ${p.id}</span>
                 <span class="text-gray-400 font-medium">${p.fecha.substring(0,10)}</span>
               </div>
-              <div class="text-sm font-medium leading-relaxed">${listaHtml}</div>
+              <div class="text-base font-medium leading-relaxed">${listaHtml}</div>
               <div class="flex justify-between items-center text-sm pt-2 border-t">
                 <span class="text-xs text-gray-400">Total Pedido:</span>
                 <span class="font-bold text-[#F2846B]">S/ ${parseFloat(p.precioVenta).toFixed(2)}</span>
@@ -1154,7 +1257,7 @@
 
       // Renderizar Historial y Boletas
       if (completados.length === 0) {
-        historialContainer.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-4">No tienes boletas archivadas.</p>`;
+        historialContainer.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-4">No tienes boletas archivadas.</p>`;
       } else {
         completados.forEach(p => {
           let itemsHtml = "";
@@ -1174,18 +1277,18 @@
                 <span class="text-[10px] text-gray-400 font-medium">${p.fecha.substring(0, 10)}</span>
               </div>
               
-              <div class="text-xs text-gray-700 font-medium space-y-1">
+              <div class="text-sm text-gray-700 font-medium space-y-1">
                 ${itemsHtml}
               </div>
 
               <!-- Footer ordenado con espaciado proporcional -->
               <div class="flex items-center justify-between pt-3 border-t border-emerald-100/50 gap-4">
                 <div>
-                  <p class="text-[9px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
-                  <p class="font-extrabold text-[#7D5A94] text-base">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
+                  <p class="text-[10px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
+                  <p class="font-extrabold text-[#7D5A94] text-lg">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
                 </div>
                 <!-- Botón de boleta proporcional y centrado -->
-                <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0">
+                <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all flex-shrink-0">
                   📄 Ver Boleta
                 </button>
               </div>
@@ -1198,7 +1301,6 @@
 
     // ==================== VISUALIZADOR DE BOLETAS VIRTUALES (CON POPUP DE ESPERA) ====================
     function abrirBoleta(idPedido) {
-      // 1. Mostrar ventana emergente de "Estamos construyendo tu boleta..."
       const loaderEspera = document.getElementById('modal-espera-boleta');
       loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
       loaderEspera.classList.add('opacity-100');
@@ -1206,7 +1308,6 @@
       fetch(`${API_URL}?action=consultarPedidosDNI&dni=${localStorage.getItem('mia_lookup_dni')}`, { redirect: "follow" })
         .then(res => res.json())
         .then(response => {
-          // 2. Ocultar ventana emergente de espera
           loaderEspera.classList.add('opacity-0', 'pointer-events-none');
           loaderEspera.classList.remove('opacity-100');
 
