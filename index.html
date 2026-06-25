@@ -118,7 +118,7 @@
   <!-- Contenedor de Estrellas para el Modo Nocturno -->
   <div id="night-stars-container" class="fixed inset-0 z-0 pointer-events-none overflow-hidden hidden"></div>
 
-  <!-- ==================== HEADER (SOL/LUNA CONTROL DE MODO - CARRITO REDISEÑADO COMPACTO) ==================== -->
+  <!-- ==================== HEADER (CON ICONO INTELIGENTE Y CARRITO COMPACTO) ==================== -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -150,7 +150,7 @@
       <!-- Banner de Bienvenida inteligente (Inicia con Texto, luego cambia a Diapositiva) -->
       <div id="banner-principal" class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md flex items-center justify-center min-h-[140px] relative overflow-hidden transition-all duration-700">
         
-        <!-- Vista Inicial: Texto "Importaciones Mágicas" -->
+        <!-- Vista Inicial: Texto "Importaciones MiaShop" -->
         <div id="banner-vista-texto" class="text-center space-y-2 z-10 transition-opacity duration-700">
           <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">On-Demand</span>
           <h2 class="font-magic text-3xl font-bold">Importaciones Mágicas</h2>
@@ -199,13 +199,13 @@
       <!-- Mascota MIMI Compacta (Mensaje ARRIBA del gatito - Temporizada a 10s) -->
       <div id="mascota-contenedor" class="flex flex-col items-center justify-center py-2 max-w-sm mx-auto hidden transition-all duration-700 overflow-hidden">
         <!-- Burbuja de diálogo arriba -->
-        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
+        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-sm font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
           <span id="mascota-frase">¡Qué excelente elección! Es uno de nuestros favoritos.</span>
         </div>
         <!-- Gatito abajo -->
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <span class="text-4xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
-          <span class="text-[9px] font-extrabold text-purple-400">MIMI</span>
+          <span class="text-5xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
+          <span class="text-xs font-extrabold text-purple-400">MIMI</span>
         </div>
       </div>
 
@@ -218,14 +218,14 @@
           <span>Subtotal estimado</span>
           <span id="totales-subtotal">S/ 0.00</span>
         </div>
-        <div class="flex justify-between items-center text-lg font-bold text-gray-800 border-t border-purple-100 pt-3">
+        <div class="flex justify-between items-center text-xl font-bold text-gray-800 border-t border-purple-100 pt-3">
           <span>Total a Pagar</span>
           <span id="totales-total" class="text-[#F2846B]">S/ 0.00</span>
         </div>
         
         <!-- Botón de Registro de Pedido -->
         <div class="pt-4">
-          <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-base py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
+          <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-lg py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
             ✨ Registrar mi Pedido y continuar
           </button>
         </div>
@@ -418,6 +418,15 @@
       <button onclick="window.print()" class="w-full bg-[#7D5A94] hover:bg-[#68497d] text-white py-3 rounded-xl text-xs font-bold transition-all shadow-md">
         🖨️ Imprimir / Guardar en PDF
       </button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ESPERA / PROCESANDO BOLETA ==================== -->
+  <div id="modal-espera-boleta" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
+    <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center space-y-3 border border-purple-100">
+      <span class="text-4xl animate-spin inline-block">⏳</span>
+      <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Estamos construyendo tu boleta...</h4>
+      <p class="text-sm text-gray-500 leading-relaxed">Por favor, espera unos segundos. ✨</p>
     </div>
   </div>
 
@@ -724,52 +733,37 @@
       }
     }
 
-    // ==================== CONSUMO DE APPS SCRIPT (CORS) ====================
-    function cargarCatalogoServidor() {
-      fetch(`${API_URL}?action=obtenerCatalogo`, { redirect: "follow" })
-        .then(res => res.json())
-        .then(response => {
-          if (response.success) {
-            catalogoProductos = response.productos;
-            categoriasLocal = response.categorias;
-            construirSelectorCategorias();
-            renderizarCatalogo();
-            iniciarCarruselBanner(); 
-          } else {
-            console.error("Error al obtener catálogo: " + response.error);
-          }
-        })
-        .catch(err => {
-          console.error("Fallo de conexión API: ", err);
-        })
-        .finally(() => {
-          document.getElementById('catalogo-cargando').classList.add('hidden');
-          document.getElementById('catalogo-grid').classList.remove('hidden');
-        });
-    }
+    // ==================== CONSUMO DE APPS SCRIPT ASÍNCRONO BLINDADO (SOLUCIONA CARGA) ====================
+    async function cargarCatalogoServidor() {
+      try {
+        const res = await fetch(`${API_URL}?action=obtenerCatalogo`, { redirect: "follow" });
+        const text = await res.text(); // Leer como texto crudo para evitar fallos silenciosos de JSON
+        
+        let response;
+        try {
+          response = JSON.parse(text);
+        } catch (jsonErr) {
+          console.error("La API no retornó un JSON estructurado. Respuesta recibida:", text);
+          alert("Error de Configuración: Tu Web App de Google Apps Script no tiene permisos de acceso público 'Cualquiera' (Anyone) o el enlace está mal configurado.");
+          return;
+        }
 
-    // ==================== CARRUSEL DINÁMICO DEL BANNER ====================
-    function iniciarCarruselBanner() {
-      if (catalogoProductos.length === 0) return;
-      
-      const productosConImagenes = catalogoProductos.filter(p => p.imagen1);
-      if (productosConImagenes.length === 0) return;
-
-      const imgEl = document.getElementById('carousel-img');
-      imgEl.src = productosConImagenes[0].imagen1;
-
-      if (intervalCarousel) clearInterval(intervalCarousel);
-
-      intervalCarousel = setInterval(() => {
-        imgEl.classList.add('fade-out-left');
-
-        setTimeout(() => {
-          indexCarousel = (indexCarousel + 1) % productosConImagenes.length;
-          imgEl.src = productosConImagenes[indexCarousel].imagen1;
-          imgEl.classList.remove('fade-out-left');
-        }, 800); 
-
-      }, 4000);
+        if (response && response.success) {
+          catalogoProductos = response.productos || [];
+          categoriasLocal = response.categorias || [];
+          construirSelectorCategorias();
+          renderizarCatalogo();
+          iniciarCarruselBanner(); 
+        } else {
+          console.error("Error al obtener catálogo:", response ? response.error : "Sin respuesta");
+        }
+      } catch (err) {
+        console.error("Fallo de conexión API: ", err);
+      } finally {
+        // Bloque de garantía absoluto: ocultar cargador y revelar área
+        document.getElementById('catalogo-cargando').classList.add('hidden');
+        document.getElementById('catalogo-grid').classList.remove('hidden');
+      }
     }
 
     // ==================== RENDERIZACIÓN DE CATÁLOGO ====================
@@ -821,7 +815,7 @@
         
         let etiquetaHtml = "";
         
-        // Validación robusta de SKU para prevenir caídas de carga
+        // Validación ultra-segura de SKU ante filas nulas o vacías
         const skuStr = prod.sku ? String(prod.sku) : "";
         const idNum = parseInt(skuStr.replace("MIA-", "")) || 0;
         
@@ -1284,15 +1278,15 @@
                 <span class="text-[10px] text-gray-400 font-medium">${p.fecha.substring(0, 10)}</span>
               </div>
               
-              <div class="text-xs text-gray-700 font-medium space-y-1">
+              <div class="text-sm text-gray-700 font-medium space-y-1">
                 ${itemsHtml}
               </div>
 
               <!-- Footer ordenado con espaciado proporcional -->
               <div class="flex items-center justify-between pt-3 border-t border-emerald-100/50 gap-4">
                 <div>
-                  <p class="text-[9px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
-                  <p class="font-extrabold text-[#7D5A94] text-base">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
+                  <p class="text-[10px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
+                  <p class="font-extrabold text-[#7D5A94] text-lg">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
                 </div>
                 <!-- Botón de boleta proporcional y centrado -->
                 <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all flex-shrink-0">
