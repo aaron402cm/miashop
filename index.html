@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MiaShop - Catálogo Oficial</title>
+  
+  <!-- Manifest & PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#7D5A94">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #FDFBFD;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-magic {
+      font-family: 'Spectral', serif;
+    }
+    /* Estilos adaptados para pantalla táctil grande */
+    .btn-large {
+      min-height: 48px;
+    }
+  </style>
+</head>
+<body class="pb-24 text-gray-800">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-1">
+        <span class="text-2xl">✨</span>
+        <h1 class="font-magic text-2xl font-bold text-[#7D5A94]">MiaShop</h1>
+      </div>
+      
+      <!-- Control de Sonidos & Indicador del Carrito -->
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSonido()" id="btn-sonido" class="p-2 text-xl hover:bg-purple-50 rounded-full transition-colors" title="Activar/Desactivar Sonidos">
+          🔊
+        </button>
+        <button onclick="cambiarSeccion('carrito')" class="relative flex items-center gap-2 bg-[#7D5A94] text-white px-3.5 py-1.5 rounded-full text-sm font-semibold hover:bg-[#6a4c7e] transition-colors">
+          <span>🛒 Mi Compra</span>
+          <span id="carrito-contador" class="bg-[#F2846B] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== CONTENEDOR PRINCIPAL ==================== -->
+  <main class="max-w-4xl mx-auto px-4 py-4">
+    
+    <!-- PANTALLA: CATÁLOGO -->
+    <section id="sec-catalogo" class="space-y-6 block">
+      
+      <!-- Banner de Bienvenida -->
+      <div class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md space-y-2 relative overflow-hidden">
+        <div class="absolute right-0 bottom-0 opacity-10 text-9xl font-magic select-none translate-y-8 translate-x-4">Mia</div>
+        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">On-Demand</span>
+        <h2 class="font-magic text-3xl font-bold">Importaciones Mágicas</h2>
+        <p class="text-sm text-purple-100 max-w-md">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
+      </div>
+
+      <!-- Filtro por Categorías (Horizontal deslizable) -->
+      <div class="space-y-2">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Categorías de Productos</span>
+        <div id="categorias-scroll" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <button onclick="filtrarCategoria('Todas')" class="cat-btn bg-[#7D5A94] text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-[#7D5A94]">Todas</button>
+        </div>
+      </div>
+
+      <!-- Buscador Simple (Diseño grande) -->
+      <div class="relative">
+        <input type="text" id="input-busqueda" oninput="filtrarPorBusqueda()" placeholder="🔍 Buscar por nombre de producto..." class="w-full px-5 py-4 rounded-2xl border-2 border-purple-100 focus:border-[#7D5A94] outline-none text-base font-medium shadow-sm transition-all">
+      </div>
+
+      <!-- Estado de carga -->
+      <div id="catalogo-cargando" class="text-center py-20 space-y-3">
+        <span class="text-4xl animate-spin inline-block">🪄</span>
+        <p class="text-sm text-gray-500 font-medium">Consultando el catálogo con Apps Script...</p>
+      </div>
+
+      <!-- Rejilla de Productos -->
+      <div id="catalogo-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6 hidden">
+        <!-- Tarjetas dinámicas se insertan aquí -->
+      </div>
+    </section>
+
+    <!-- PANTALLA: CARRITO ("MI COMPRA") -->
+    <section id="sec-carrito" class="space-y-6 hidden">
+      <div class="flex items-center justify-between border-b border-purple-100 pb-4">
+        <h2 class="font-magic text-2xl font-bold text-[#7D5A94]">📋 Mi Carrito de Compras</h2>
+        <button onclick="vaciarCarrito()" class="text-xs text-red-500 hover:underline font-semibold">Vaciar Carrito</button>
+      </div>
+
+      <!-- Lista de Productos en el Carrito -->
+      <div id="carrito-lista" class="space-y-4">
+        <!-- Render dinámico -->
+      </div>
+
+      <!-- Detalle de Importes -->
+      <div id="carrito-totales" class="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 space-y-3 hidden">
+        <div class="flex justify-between items-center text-sm font-medium text-gray-500">
+          <span>Subtotal estimado</span>
+          <span id="totales-subtotal">S/ 0.00</span>
+        </div>
+        <div class="flex justify-between items-center text-lg font-bold text-gray-800 border-t border-purple-100 pt-3">
+          <span>Total a Pagar</span>
+          <span id="totales-total" class="text-[#F2846B]">S/ 0.00</span>
+        </div>
+      </div>
+
+      <!-- Formulario de Pedido (Datos Clientes) -->
+      <div id="carrito-formulario" class="bg-white p-6 rounded-2xl border border-purple-100 space-y-4 hidden">
+        <h3 class="font-magic text-lg font-bold text-[#7D5A94] border-b border-purple-50 pb-2">Información de Envío</h3>
+        
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">DNI / RUC (Requerido)</label>
+          <input type="number" id="form-dni" placeholder="Ingresa tu documento de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all" required>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tu Nombre Completo</label>
+          <input type="text" id="form-nombre" placeholder="Nombre y Apellidos" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all" required>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Departamento de Destino</label>
+          <select id="form-departamento" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] bg-white text-base transition-all">
+            <option value="Lima">Lima</option>
+            <option value="Máncora">Máncora</option>
+            <option value="Arequipa">Arequipa</option>
+            <option value="La Libertad">La Libertad</option>
+            <option value="Piura">Piura</option>
+            <option value="Cusco">Cusco</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Notas del Pedido</label>
+          <textarea id="form-notas" rows="2" placeholder="Indicaciones para la entrega..." class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all"></textarea>
+        </div>
+
+        <button onclick="procesarConfirmacionPedido()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-base py-3.5 px-6 rounded-xl transition-all shadow-md">
+          ✨ Registrar mi pedido y continuar
+        </button>
+      </div>
+
+      <!-- Estado Carrito Vacío -->
+      <div id="carrito-vacio" class="text-center py-16 space-y-4">
+        <span class="text-6xl">🛍️</span>
+        <h3 class="font-magic text-xl font-bold text-gray-500">Tu cesta está vacía</h3>
+        <p class="text-sm text-gray-400">Regresa al catálogo y selecciona tus productos favoritos.</p>
+        <button onclick="cambiarSeccion('catalogo')" class="bg-[#7D5A94] text-white px-6 py-3 rounded-full text-sm font-semibold shadow">Ir a Ver Productos</button>
+      </div>
+    </section>
+
+    <!-- PANTALLA: SEGUIMIENTO & HISTORIAL -->
+    <section id="sec-pedidos" class="space-y-6 hidden">
+      <div class="border-b border-purple-100 pb-4">
+        <h2 class="font-magic text-2xl font-bold text-[#7D5A94]">🚚 Consulta de Pedidos</h2>
+        <p class="text-xs text-gray-500">Ingresa tu DNI para conocer el estado y el historial de compras en MiaShop.</p>
+      </div>
+
+      <!-- Formulario DNI -->
+      <div class="bg-white p-6 rounded-2xl border border-purple-100 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Introduce tu DNI de Clienta</label>
+          <div class="flex gap-2">
+            <input type="number" id="input-dni-consulta" placeholder="Ej: 45678912" class="flex-1 px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-lg font-bold tracking-wider">
+            <button onclick="consultarPedidosDNI()" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-6 rounded-xl font-semibold transition-colors">Consultar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loader de Consulta -->
+      <div id="consulta-loader" class="text-center py-12 hidden">
+        <span class="text-3xl animate-spin inline-block">🔮</span>
+        <p class="text-xs text-gray-400 mt-2">Buscando tus pedidos en el pergamino...</p>
+      </div>
+
+      <!-- Lista de Pedidos Encontrados -->
+      <div id="consulta-resultados" class="space-y-8 hidden">
+        
+        <!-- Pedidos Activos (Fases 1 a 3) -->
+        <div class="space-y-4">
+          <h3 class="font-magic text-lg font-bold text-[#7D5A94] border-b pb-2 flex items-center gap-2">⏳ Pedidos Activos</h3>
+          <div id="lista-pedidos-activos" class="space-y-6">
+            <!-- Dinámico -->
+          </div>
+        </div>
+
+        <!-- Historial y Boletas (Fase 4: Entregado) -->
+        <div class="space-y-4">
+          <h3 class="font-magic text-lg font-bold text-emerald-800 border-b pb-2 flex items-center gap-2">📜 Historial y Boletas Archivadas</h3>
+          <div id="lista-pedidos-historial" class="space-y-4">
+            <!-- Dinámico -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="consulta-vacio" class="text-center py-10 border border-dashed border-purple-200 rounded-2xl text-gray-400 italic text-sm hidden">
+        No se encontraron pedidos vigentes ni boletas archivadas bajo este DNI.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== BARRA DE NAVEGACIÓN MÓVIL ==================== -->
+  <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-purple-100 shadow-xl z-40">
+    <div class="max-w-4xl mx-auto flex justify-around items-center h-20">
+      <button onclick="cambiarSeccion('catalogo')" id="nav-catalogo" class="flex flex-col items-center justify-center w-24 text-[#7D5A94]">
+        <span class="text-2xl">🏠</span>
+        <span class="text-[10px] font-bold mt-1 uppercase">Catálogo</span>
+      </button>
+      <button onclick="cambiarSeccion('carrito')" id="nav-carrito" class="flex flex-col items-center justify-center w-24 text-gray-400 hover:text-[#7D5A94] relative">
+        <span class="text-2xl">🛒</span>
+        <span class="text-[10px] font-bold mt-1 uppercase">Mi Compra</span>
+      </button>
+      <button onclick="cambiarSeccion('pedidos')" id="nav-pedidos" class="flex flex-col items-center justify-center w-24 text-gray-400 hover:text-[#7D5A94]">
+        <span class="text-2xl">🚚</span>
+        <span class="text-[10px] font-bold mt-1 uppercase">Seguimiento</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODAL DE CONFIRMACIÓN DE AGREGADO ==================== -->
+  <div id="modal-confirmacion" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 border border-purple-100">
+      <div class="text-center">
+        <span class="text-5xl">🛍️</span>
+        <h4 class="font-magic text-xl font-bold text-[#7D5A94] mt-2">¿Confirmamos la selección?</h4>
+        <p class="text-xs text-gray-500 mt-1 leading-relaxed">¿Deseas agregar <span id="conf-prod-nombre" class="font-bold text-gray-800"></span> a tu pedido?</p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="cerrarModalConfirmacion()" class="flex-1 py-3 border border-purple-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors">Cancelar</button>
+        <button id="btn-confirmar-add" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Sí, agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL GENERACIÓN DE BOLETA ==================== -->
+  <div id="modal-boleta" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-6 border border-purple-100 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-dashed border-purple-200 pb-3">
+        <div>
+          <h4 class="font-magic text-xl font-bold text-[#7D5A94]">✨ BOLETA OFICIAL</h4>
+          <p class="text-[10px] text-gray-400 tracking-wider">MiaShop - Importación On-Demand</p>
+        </div>
+        <button onclick="cerrarModalBoleta()" class="text-gray-400 text-2xl font-bold hover:text-gray-600">&times;</button>
+      </div>
+      
+      <!-- Detalle Ticket -->
+      <div class="space-y-3 text-xs font-mono bg-purple-50/20 p-4 rounded-xl border border-purple-50">
+        <div class="flex justify-between"><span>BOLETA ID:</span><span id="bol-id" class="font-bold"></span></div>
+        <div class="flex justify-between"><span>FECHA:</span><span id="bol-fecha"></span></div>
+        <div class="flex justify-between"><span>DNI CLIENTA:</span><span id="bol-dni"></span></div>
+        <div class="flex justify-between"><span>COMPRADORA:</span><span id="bol-nombre"></span></div>
+        <div class="flex justify-between"><span>ESTADO:</span><span class="text-emerald-600 font-bold">✅ ENTREGADO</span></div>
+        <div class="border-b border-dashed border-gray-300 my-2"></div>
+        
+        <div class="space-y-1">
+          <p class="font-bold text-gray-500">DETALLE DE COMPRA:</p>
+          <div id="bol-items" class="space-y-1"></div>
+        </div>
+        
+        <div class="border-b border-dashed border-gray-300 my-2"></div>
+        <div class="flex justify-between text-sm font-bold text-[#7D5A94]">
+          <span>Monto Cobrado:</span>
+          <span id="bol-total"></span>
+        </div>
+      </div>
+      
+      <button onclick="window.print()" class="w-full bg-[#7D5A94] hover:bg-[#68497d] text-white py-3 rounded-xl text-xs font-bold transition-all shadow-md">
+        🖨️ Imprimir / Guardar en PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== CÓDIGO JS INTEGRAL ==================== -->
+  <script>
+    // URL Web App de Google Apps Script (Coloca tu URL de publicación aquí)
+    const API_URL = "https://script.google.com/macros/s/AKfycbyGMVq7Ricbcjy5Hcnwg2frnOr9MbsSelytAdI_YWEF4HAorDJfy_ZA5_BRGvdMO-ik/exec";
+
+    // Variables de Estado de la Aplicación
+    let catalogoProductos = [];
+    let categoriasLocal = [];
+    let carrito = JSON.parse(localStorage.getItem('mia_catalog_cart')) || [];
+    let soundEnabled = localStorage.getItem('mia_sound_enabled') !== '0';
+    let categoriaSeleccionada = 'Todas';
+    let productoPorAgregar = null;
+
+    // Inicialización
+    document.addEventListener("DOMContentLoaded", () => {
+      actualizarContadorCarrito();
+      cargarCatalogoServidor();
+      configurarUI();
+    });
+
+    function configurarUI() {
+      // Sincronizar UI de sonidos
+      const btn = document.getElementById('btn-sonido');
+      btn.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+
+    // ==================== SONIDOS SINTETIZADOS (Satisfacción del Cliente) ====================
+    function playChime() {
+      if (!soundEnabled) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const now = ctx.currentTime;
+        
+        // Acorde arpegiado ascendente en clave de Do Mayor (C5, E5, G5, C6)
+        const notas = [523.25, 659.25, 783.99, 1046.50];
+        notas.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + (index * 0.06));
+          
+          gain.gain.setValueAtTime(0, now + (index * 0.06));
+          gain.gain.linearRampToValueAtTime(0.08, now + (index * 0.06) + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + (index * 0.06) + 0.25);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + (index * 0.06));
+          osc.stop(now + (index * 0.06) + 0.3);
+        });
+      } catch (e) {
+        console.warn("AudioContext no iniciado aún.");
+      }
+    }
+
+    function toggleSonido() {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('mia_sound_enabled', soundEnabled ? '1' : '0');
+      document.getElementById('btn-sonido').textContent = soundEnabled ? '🔊' : '🔇';
+      if (soundEnabled) playChime();
+    }
+
+    // ==================== CAMBIO DE PANTALLAS (SPA) ====================
+    function cambiarSeccion(seccionId) {
+      if (soundEnabled) {
+        // Sonido sutil para navegación
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.02, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(); osc.stop(ctx.currentTime + 0.1);
+        } catch(e){}
+      }
+
+      const secciones = ['catalogo', 'carrito', 'pedidos'];
+      secciones.forEach(id => {
+        document.getElementById('sec-' + id).classList.add('hidden');
+        document.getElementById('sec-' + id).classList.remove('block');
+        
+        // Reset botones de menú
+        const navBtn = document.getElementById('nav-' + id);
+        navBtn.classList.add('text-gray-400');
+        navBtn.classList.remove('text-[#7D5A94]');
+      });
+
+      document.getElementById('sec-' + seccionId).classList.remove('hidden');
+      document.getElementById('sec-' + seccionId).classList.add('block');
+      
+      const actBtn = document.getElementById('nav-' + seccionId);
+      actBtn.classList.remove('text-gray-400');
+      actBtn.classList.add('text-[#7D5A94]');
+
+      if (seccionId === 'carrito') {
+        renderizarCarrito();
+      }
+    }
+
+    // ==================== CONSUMO DE APPS SCRIPT (CORS) ====================
+    function cargarCatalogoServidor() {
+      fetch(`${API_URL}?action=obtenerCatalogo`, { redirect: "follow" })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            catalogoProductos = response.productos;
+            categoriasLocal = response.categorias;
+            construirSelectorCategorias();
+            renderizarCatalogo();
+          } else {
+            console.error("Error al obtener catálogo: " + response.error);
+          }
+        })
+        .catch(err => {
+          console.error("Fallo de conexión API: ", err);
+        })
+        .finally(() => {
+          document.getElementById('catalogo-cargando').classList.add('hidden');
+          document.getElementById('catalogo-grid').classList.remove('hidden');
+        });
+    }
+
+    // ==================== RENDERIZACIÓN DE CATÁLOGO ====================
+    function construirSelectorCategorias() {
+      const container = document.getElementById('categorias-scroll');
+      container.innerHTML = `<button onclick="filtrarCategoria('Todas')" class="cat-btn px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-[#7D5A94] ${categoriaSeleccionada === 'Todas' ? 'bg-[#7D5A94] text-white' : 'bg-white text-[#7D5A94]'}">Todas</button>`;
+      
+      categoriasLocal.forEach(cat => {
+        const activo = categoriaSeleccionada === cat;
+        container.innerHTML += `
+          <button onclick="filtrarCategoria('${cat}')" class="cat-btn px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap border border-[#7D5A94] ${activo ? 'bg-[#7D5A94] text-white' : 'bg-white text-[#7D5A94]'}">${cat}</button>
+        `;
+      });
+    }
+
+    function filtrarCategoria(cat) {
+      categoriaSeleccionada = cat;
+      construirSelectorCategorias();
+      renderizarCatalogo();
+    }
+
+    function filtrarPorBusqueda() {
+      renderizarCatalogo();
+    }
+
+    function renderizarCatalogo() {
+      const grid = document.getElementById('catalogo-grid');
+      const query = document.getElementById('input-busqueda').value.toLowerCase().trim();
+      
+      grid.innerHTML = "";
+      
+      const filtrados = catalogoProductos.filter(prod => {
+        // Filtrado por categoría
+        if (categoriaSeleccionada !== 'Todas' && prod.categoria !== categoriaSeleccionada) return false;
+        // Filtrado por barra de búsqueda
+        if (query && !prod.nombre.toLowerCase().includes(query)) return false;
+        // Solo mostrar activos comercialmente
+        return prod.estado === "Activo";
+      });
+
+      if (filtrados.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 text-gray-400 italic">
+            Ningún producto disponible bajo este filtro de búsqueda.
+          </div>
+        `;
+        return;
+      }
+
+      filtrados.forEach(prod => {
+        const img = prod.imagen1 || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=250';
+        
+        // Simulación inteligente de etiquetas comerciales según SKU e importación
+        let etiquetaHtml = "";
+        const idNum = parseInt(prod.sku.replace("MIA-", ""));
+        if (idNum % 3 === 0) {
+          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#F2846B] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">🔥 Oferta</span>`;
+        } else if (idNum % 5 === 0) {
+          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#D4AF37] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">⭐ Destacado</span>`;
+        } else {
+          etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#7D5A94] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">✨ Nuevo</span>`;
+        }
+
+        const card = `
+          <div class="bg-white rounded-3xl p-4 border border-purple-100/50 shadow-sm flex flex-col justify-between relative hover:shadow-md transition-shadow">
+            <div>
+              <div class="relative w-full h-48 rounded-2xl overflow-hidden mb-3 bg-purple-50 flex items-center justify-center">
+                ${etiquetaHtml}
+                <img src="${img}" class="w-full h-full object-cover">
+              </div>
+              <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${prod.sku} | ${prod.categoria}</span>
+              <h3 class="font-magic text-lg font-bold text-[#7D5A94] mt-0.5 leading-tight">${prod.nombre}</h3>
+            </div>
+            <div class="mt-4 border-t border-purple-50/50 pt-3 flex items-center justify-between">
+              <div class="flex flex-col">
+                <span class="text-[9px] text-gray-400 uppercase font-semibold">Precio S/</span>
+                <span class="text-xl font-extrabold text-[#F2846B]">S/ ${parseFloat(prod.precioVenta).toFixed(2)}</span>
+              </div>
+              <button onclick="solicitarAgregarAlCarrito('${prod.sku}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-colors">
+                <span>🛒 Comprar</span>
+              </button>
+            </div>
+          </div>
+        `;
+        grid.innerHTML += card;
+      });
+    }
+
+    // ==================== CONFIRMACIÓN DE COMPRA (Evita clics accidentales) ====================
+    function solicitarAgregarAlCarrito(sku) {
+      const prod = catalogoProductos.find(p => p.sku === sku);
+      if (!prod) return;
+      
+      productoPorAgregar = prod;
+      document.getElementById('conf-prod-nombre').textContent = prod.nombre;
+      
+      const modal = document.getElementById('modal-confirmacion');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100');
+      
+      // Enlace de acción al botón de confirmación
+      document.getElementById('btn-confirmar-add').onclick = confirmarAgregarAlCarrito;
+    }
+
+    function cerrarModalConfirmacion() {
+      const modal = document.getElementById('modal-confirmacion');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100');
+      productoPorAgregar = null;
+    }
+
+    function confirmarAgregarAlCarrito() {
+      if (!productoPorAgregar) return;
+      
+      const SKU = productoPorAgregar.sku;
+      const index = carrito.findIndex(item => item.sku === SKU);
+      
+      if (index !== -1) {
+        carrito[index].cantidad += 1;
+      } else {
+        carrito.push({
+          sku: SKU,
+          nombre: productoPorAgregar.nombre,
+          precioVenta: productoPorAgregar.precioVenta,
+          precioCompra: productoPorAgregar.precioCompra,
+          categoria: productoPorAgregar.categoria,
+          cantidad: 1
+        });
+      }
+      
+      // Sincronizar persistencia local
+      localStorage.setItem('mia_catalog_cart', JSON.stringify(carrito));
+      
+      // Retroalimentación de audio y visual
+      playChime();
+      actualizarContadorCarrito();
+      cerrarModalConfirmacion();
+      
+      // Pequeño aviso amigable superior en lugar de alertas intrusivas
+      mostrarMensajeAlerta("¡Agregado con éxito a tu pedido! ✨");
+    }
+
+    function actualizarContadorCarrito() {
+      const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+      document.getElementById('carrito-contador').textContent = totalItems;
+    }
+
+    // Mensaje flotante moderno
+    function mostrarMensajeAlerta(texto) {
+      const alertDiv = document.createElement("div");
+      alertDiv.className = "fixed top-20 left-1/2 -translate-x-1/2 bg-[#7D5A94] text-white font-bold text-xs px-5 py-3 rounded-full shadow-lg z-50 animate-bounce";
+      alertDiv.textContent = texto;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 2500);
+    }
+
+    // ==================== RENDERS DE CARRITO DE COMPRA ====================
+    function renderizarCarrito() {
+      const lista = document.getElementById('carrito-lista');
+      const totales = document.getElementById('carrito-totales');
+      const formulario = document.getElementById('carrito-formulario');
+      const vacio = document.getElementById('carrito-vacio');
+
+      lista.innerHTML = "";
+
+      if (carrito.length === 0) {
+        vacio.classList.remove('hidden');
+        totales.classList.add('hidden');
+        formulario.classList.add('hidden');
+        return;
+      }
+
+      vacio.classList.add('hidden');
+      totales.classList.remove('hidden');
+      formulario.classList.remove('hidden');
+
+      let subtotal = 0;
+
+      carrito.forEach((item, index) => {
+        const itemTotal = parseFloat(item.precioVenta) * item.cantidad;
+        subtotal += itemTotal;
+
+        const row = `
+          <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4">
+            <div class="flex-1">
+              <span class="text-[9px] font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
+              <h4 class="font-magic text-base font-bold text-gray-800 leading-snug">${item.nombre}</h4>
+              <p class="text-sm font-extrabold text-[#F2846B] mt-0.5">S/ ${parseFloat(item.precioVenta).toFixed(2)} c/u</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="modificarCantidadItem(${index}, -1)" class="w-8 h-8 rounded-full border border-purple-200 flex items-center justify-center font-bold text-gray-600 hover:bg-purple-50">-</button>
+              <span class="w-8 text-center text-sm font-bold text-gray-800">${item.cantidad}</span>
+              <button onclick="modificarCantidadItem(${index}, 1)" class="w-8 h-8 rounded-full border border-purple-200 flex items-center justify-center font-bold text-gray-600 hover:bg-purple-50">+</button>
+            </div>
+
+            <div class="text-right">
+              <p class="text-xs text-gray-400">Total</p>
+              <p class="text-base font-extrabold text-[#7D5A94]">S/ ${itemTotal.toFixed(2)}</p>
+            </div>
+          </div>
+        `;
+        lista.innerHTML += row;
+      });
+
+      document.getElementById('totales-subtotal').textContent = `S/ ${subtotal.toFixed(2)}`;
+      document.getElementById('totales-total').textContent = `S/ ${subtotal.toFixed(2)}`;
+    }
+
+    function modificarCantidadItem(index, valor) {
+      carrito[index].cantidad += valor;
+      if (carrito[index].cantidad <= 0) {
+        carrito.splice(index, 1);
+      }
+      localStorage.setItem('mia_catalog_cart', JSON.stringify(carrito));
+      actualizarContadorCarrito();
+      renderizarCarrito();
+    }
+
+    function vaciarCarrito() {
+      if (!confirm("¿Deseas quitar todos los productos de tu pedido?")) return;
+      carrito = [];
+      localStorage.removeItem('mia_catalog_cart');
+      actualizarContadorCarrito();
+      renderizarCarrito();
+    }
+
+    // ==================== ENVÍO DEL PEDIDO A APPS SCRIPT (CORS) ====================
+    function procesarConfirmacionPedido() {
+      const dni = document.getElementById('form-dni').value.trim();
+      const nombre = document.getElementById('form-nombre').value.trim();
+      const depto = document.getElementById('form-departamento').value;
+      const notas = document.getElementById('form-notas').value.trim();
+
+      if (!dni || !nombre) {
+        alert("Por favor, introduce tu DNI y tu Nombre Completo para culminar el registro.");
+        return;
+      }
+
+      // Preparación del pedido
+      let totalVenta = 0;
+      let totalCompra = 0;
+      const detalleProductos = carrito.map(item => {
+        totalVenta += (parseFloat(item.precioVenta) * item.cantidad);
+        totalCompra += (parseFloat(item.precioCompra) * item.cantidad);
+        return { sku: item.sku, nombre: item.nombre, cantidad: item.cantidad };
+      });
+
+      const pedidoDTO = {
+        dniCliente: dni,
+        nombreCliente: nombre,
+        departamento: depto,
+        detalleProductos: detalleProductos,
+        categoriaPrincipal: carrito[0].categoria,
+        precioCompra: totalCompra,
+        precioVenta: totalVenta,
+        metodoPago: "Contraentrega (Efectivo)",
+        aportes: notas ? `Nota de la clienta: ${notas}` : ""
+      };
+
+      // Registrar DNI localmente para facilitar siguientes consultas
+      localStorage.setItem('mia_lookup_dni', dni);
+
+      // Bloquear pantalla con loader dinámico
+      mostrarMensajeAlerta("Invocando pedido en el sistema principal... 🪄");
+
+      fetch(`${API_URL}?action=crearPedido&datos=${encodeURIComponent(JSON.stringify(pedidoDTO))}`, { redirect: "follow" })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            // Éxito: Preparar puente de envío con WhatsApp de MiaShop
+            generarEnlaceWhatsApp(pedidoDTO);
+            
+            // Vaciar carrito
+            carrito = [];
+            localStorage.removeItem('mia_catalog_cart');
+            actualizarContadorCarrito();
+            
+            // Redirigir a Seguimiento de Pedidos
+            document.getElementById('input-dni-consulta').value = dni;
+            cambiarSeccion('pedidos');
+            consultarPedidosDNI();
+          } else {
+            alert("Ocurrió un error en el registro de tu pedido: " + response.error);
+          }
+        })
+        .catch(err => {
+          console.error("Fallo de red: ", err);
+        });
+    }
+
+    // Enlace de salida opcional listo para conectar con WhatsApp (MiaShop)
+    function generarEnlaceWhatsApp(pedido) {
+      const numeroCelularAdmin = "51987654321"; // Reemplaza por tu celular real de MiaShop
+      let listaTexto = "";
+      pedido.detalleProductos.forEach(i => {
+        listaTexto += `• ${i.nombre} (Cant: ${i.cantidad})\n`;
+      });
+      
+      const mensaje = `✨ *MIA_SHOP - PEDIDO REGISTRADO* ✨\n\n` +
+                      `📋 *Cliente:* ${pedido.nombreCliente}\n` +
+                      `💳 *DNI/RUC:* ${pedido.dniCliente}\n` +
+                      `📍 *Destino:* ${pedido.departamento}\n\n` +
+                      `📦 *Productos Seleccionados:*\n${listaTexto}\n` +
+                      `💰 *Monto Estimado:* S/ ${pedido.precioVenta.toFixed(2)}\n\n` +
+                      `⚙️ _Pedido registrado automáticamente en el catálogo virtual._`;
+
+      const link = `https://wa.me/${numeroCelularAdmin}?text=${encodeURIComponent(mensaje)}`;
+      
+      // Abrir WhatsApp en pestaña independiente para confirmar comunicación manual
+      window.open(link, '_blank');
+    }
+
+    // ==================== SEGUIMIENTO DE PEDIDOS (DNI LOOKUP) ====================
+    function consultarPedidosDNI() {
+      const dni = document.getElementById('input-dni-consulta').value.trim();
+      if (!dni) {
+        alert("Ingresa tu DNI para localizar tus pedidos.");
+        return;
+      }
+
+      document.getElementById('consulta-loader').classList.remove('hidden');
+      document.getElementById('consulta-resultados').classList.add('hidden');
+      document.getElementById('consulta-vacio').classList.add('hidden');
+
+      fetch(`${API_URL}?action=consultarPedidosDNI&dni=${dni}`, { redirect: "follow" })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            renderizarPedidosConsulta(response.pedidos);
+          } else {
+            console.error("Fallo del servidor: ", response.error);
+          }
+        })
+        .catch(err => console.error(err))
+        .finally(() => {
+          document.getElementById('consulta-loader').classList.add('hidden');
+        });
+    }
+
+    function renderizarPedidosConsulta(pedidos) {
+      const activosContainer = document.getElementById('lista-pedidos-activos');
+      const historialContainer = document.getElementById('lista-pedidos-historial');
+      
+      activosContainer.innerHTML = "";
+      historialContainer.innerHTML = "";
+
+      const activos = pedidos.filter(p => p.estadoEnvio !== "Entregado");
+      const completados = pedidos.filter(p => p.estadoEnvio === "Entregado");
+
+      if (pedidos.length === 0) {
+        document.getElementById('consulta-vacio').classList.remove('hidden');
+        return;
+      }
+
+      document.getElementById('consulta-resultados').classList.remove('hidden');
+
+      // 1. Renderizar Pedidos en Progreso con Timeline
+      if (activos.length === 0) {
+        activosContainer.innerHTML = `<p class="text-xs text-gray-400 italic">No tienes pedidos en progreso de despacho.</p>`;
+      } else {
+        activos.forEach(p => {
+          let listaHtml = "";
+          try {
+            const items = JSON.parse(p.detalleProductos);
+            items.forEach(i => {
+              listaHtml += `• ${i.nombre} <span class="text-purple-600 font-bold">(x${i.cantidad})</span><br>`;
+            });
+          } catch(e) { listaHtml = "Formato de producto no compatible"; }
+
+          // Fases para la línea de tiempo
+          const fases = ['Pendiente', 'En Proceso', 'Enviado'];
+          const faseIndex = fases.indexOf(p.estadoEnvio);
+          
+          let timelineHtml = `<div class="flex items-center justify-between mt-4">`;
+          fases.forEach((f, i) => {
+            const pasoCompletado = i <= faseIndex;
+            const circuloColor = pasoCompletado ? 'bg-[#7D5A94] text-white' : 'bg-gray-100 text-gray-400';
+            const etiquetaColor = pasoCompletado ? 'text-[#7D5A94] font-bold' : 'text-gray-400';
+            
+            timelineHtml += `
+              <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${circuloColor}">
+                  ${i + 1}
+                </div>
+                <span class="text-[10px] mt-1 ${etiquetaColor}">${f === 'Pendiente' ? 'Compra ⌛' : f === 'En Proceso' ? 'Empaque 📦' : 'En Ruta 🚚'}</span>
+              </div>
+            `;
+          });
+          timelineHtml += `</div>`;
+
+          const card = `
+            <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3">
+              <div class="flex justify-between items-center border-b pb-2 text-xs">
+                <span class="font-bold text-[#7D5A94]">ID: ${p.id}</span>
+                <span class="text-gray-400 font-medium">${p.fecha.substring(0,10)}</span>
+              </div>
+              <div class="text-sm font-medium leading-relaxed">${listaHtml}</div>
+              <div class="flex justify-between items-center text-sm pt-2 border-t">
+                <span class="text-xs text-gray-400">Total Pedido:</span>
+                <span class="font-bold text-[#F2846B]">S/ ${parseFloat(p.precioVenta).toFixed(2)}</span>
+              </div>
+              ${timelineHtml}
+            </div>
+          `;
+          activosContainer.innerHTML += card;
+        });
+      }
+
+      // 2. Renderizar Historial y Boletas Virtuales
+      if (completados.length === 0) {
+        historialContainer.innerHTML = `<p class="text-xs text-gray-400 italic">Historial de boletas archivadas vacío.</p>`;
+      } else {
+        completados.forEach(p => {
+          let itemsHtml = "";
+          try {
+            JSON.parse(p.detalleProductos).forEach(i => {
+              itemsHtml += `${i.nombre} (x${i.cantidad}) `;
+            });
+          } catch(e) {}
+
+          const row = `
+            <div class="bg-emerald-50/20 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between text-xs gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 font-bold text-emerald-800">
+                  <span>✅ Entregado</span>
+                  <span class="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">${p.id}</span>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-0.5">Fecha de Entrega: ${p.fecha.substring(0, 10)}</p>
+                <p class="truncate text-gray-600 mt-1">${itemsHtml}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-bold text-[#7D5A94] text-sm">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
+                <button onclick="abrirBoleta('${p.id}')" class="mt-1 text-[10px] font-bold text-emerald-700 hover:underline">Ver Boleta 📋</button>
+              </div>
+            </div>
+          `;
+          historialContainer.innerHTML += row;
+        });
+      }
+    }
+
+    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES ====================
+    function abrirBoleta(idPedido) {
+      fetch(`${API_URL}?action=consultarPedidosDNI&dni=${localStorage.getItem('mia_lookup_dni')}`, { redirect: "follow" })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            const pedido = response.pedidos.find(p => p.id === idPedido);
+            if (!pedido) return;
+
+            document.getElementById('bol-id').textContent = pedido.id;
+            document.getElementById('bol-fecha').textContent = pedido.fecha.substring(0, 10);
+            document.getElementById('bol-dni').textContent = pedido.dniCliente;
+            document.getElementById('bol-nombre').textContent = pedido.nombreCliente;
+            document.getElementById('bol-total').textContent = `S/ ${parseFloat(pedido.precioVenta).toFixed(2)}`;
+
+            const itemsContainer = document.getElementById('bol-items');
+            itemsContainer.innerHTML = "";
+            
+            try {
+              JSON.parse(pedido.detalleProductos).forEach(i => {
+                itemsContainer.innerHTML += `<div class="flex justify-between"><span>${i.nombre} x${i.cantidad}</span></div>`;
+              });
+            } catch(e) {}
+
+            const modal = document.getElementById('modal-boleta');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+          }
+        });
+    }
+
+    function cerrarModalBoleta() {
+      const modal = document.getElementById('modal-boleta');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100');
+    }
+  </script>
+</body>
+</html>
