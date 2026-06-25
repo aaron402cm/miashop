@@ -372,12 +372,12 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL: ESPERA / PROCESANDO BOLETA (NUEVO) ==================== -->
+  <!-- ==================== MODAL: ESPERA / PROCESANDO BOLETA ==================== -->
   <div id="modal-espera-boleta" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center space-y-3 border border-purple-100">
       <span class="text-4xl animate-spin inline-block">⏳</span>
-      <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Construyendo boleta...</h4>
-      <p class="text-xs text-gray-500 leading-relaxed">Estamos preparando tu boleta oficial. Unos segundos por favor. ✨</p>
+      <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Estamos construyendo tu boleta...</h4>
+      <p class="text-xs text-gray-500 leading-relaxed">Por favor, espera unos segundos. ✨</p>
     </div>
   </div>
 
@@ -410,7 +410,7 @@
       "¡Una maravilla de elección! Este producto tiene un acabado único.",
       "¡Qué buena elección has hecho, te felicito de corazón!",
       "¡Perfecto! Un producto diseñado para deslumbrar.",
-      "¡Esto es una joya! Me hace muy feliz que lo leves.",
+      "¡Esto es una joya! Me hace muy feliz que lo lleves.",
       "¡Muy bien pensado! Es un artículo súper útil y hermoso.",
       "¡Qué estilo tienes! Tus elecciones siempre son de primer nivel.",
       "¡Es bellísimo! Te aseguro que recibirás muchos cumplidos.",
@@ -501,6 +501,15 @@
       "¡Qué gran decisión! Un producto súper versátil que te encantará usar.",
       "¡Excelente gusto! Me alegra que hayas encontrado este producto en MiaShop."
     ];
+
+    // Registrar Service Worker para soporte offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado con éxito', reg))
+          .catch(err => console.warn('No se pudo registrar el Service Worker', err));
+      });
+    }
 
     // Inicialización del catálogo
     document.addEventListener("DOMContentLoaded", () => {
@@ -864,7 +873,7 @@
       setTimeout(() => alertDiv.remove(), 2500);
     }
 
-    // ==================== RENDERS DE CARRITO DE COMPRA (CON MIMI TEMPORIZADA A 10 SEGUNDOS) ====================
+    // ==================== RENDERS DE CARRITO DE COMPRA (MIMI TEMPORIZADA A 10 SEGUNDOS) ====================
     function renderizarCarrito() {
       const lista = document.getElementById('carrito-lista');
       const totales = document.getElementById('carrito-totales');
@@ -917,7 +926,8 @@
           <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4">
             <div class="flex-1">
               <span class="text-[9px] font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
-              <h4 class="font-magic text-base font-bold text-gray-800 leading-snug">${item.nombre}</h4>
+              <!-- Clic en el nombre para abrir detalles con fotos -->
+              <h4 onclick="mostrarDetalleProducto('${item.sku}')" class="font-magic text-base font-bold text-[#7D5D99] hover:underline cursor-pointer leading-snug">${item.nombre}</h4>
               <p class="text-sm font-extrabold text-[#F2846B] mt-0.5">S/ ${precio.toFixed(2)} c/u</p>
             </div>
             
@@ -946,14 +956,6 @@
         carrito.splice(index, 1);
       }
       localStorage.setItem('mia_catalog_cart', JSON.stringify(carrito));
-      actualizarContadorCarrito();
-      renderizarCarrito();
-    }
-
-    function vaciarCarrito() {
-      if (!confirm("¿Deseas quitar todos los productos de tu pedido?")) return;
-      carrito = [];
-      localStorage.removeItem('mia_catalog_cart');
       actualizarContadorCarrito();
       renderizarCarrito();
     }
@@ -989,7 +991,7 @@
       let totalCompra = 0;
       const detalleProductos = carrito.map(item => {
         const precioV = parseFloat(item.precioVenta || item["Precio Venta"] || item.precio_venta || 0);
-        const precioC = parseFloat(item.precioCompra || item["Precio Compra"] || item.precio_compra || 0);
+        const precioC = parseFloat(item.precioCompra || item["Precio Comra"] || item["Precio Compra"] || item.precio_compra || 0);
         totalVenta += (precioV * item.cantidad);
         totalCompra += (precioC * item.cantidad);
         return { sku: item.sku, nombre: item.nombre, cantidad: item.cantidad };
@@ -1015,7 +1017,10 @@
         .then(res => res.json())
         .then(response => {
           if (response.success) {
+            // Sincronizar el nombre real devuelto por la API
+            pedidoDTO.nombreCliente = response.nombreCliente || "Clienta Nueva";
             generarEnlaceWhatsApp(pedidoDTO);
+            
             carrito = [];
             localStorage.removeItem('mia_catalog_cart');
             actualizarContadorCarrito();
@@ -1032,18 +1037,21 @@
         });
     }
 
+    // ==================== FORMATO AMIGABLE PARA MENSAJE WHATSAPP ====================
     function generarEnlaceWhatsApp(pedido) {
       const numeroCelularAdmin = "51923934517"; // Tu número real de MiaShop
       let listaTexto = "";
       pedido.detalleProductos.forEach(i => {
-        listaTexto += `• ${i.nombre} (Cant: ${i.cantidad})\n`;
+        listaTexto += `• *${i.nombre}* (Cant: ${i.cantidad})\n`;
       });
       
-      const mensaje = `✨ *MIA_SHOP - PEDIDO REGISTRADO* ✨\n\n` +
+      const mensaje = `✨ *¡Hola MiaShop! Acabo de registrar mi pedido* ✨\n\n` +
+                      `🧙‍♀️ *Datos de la Clienta:*\n` +
+                      `👤 *Nombre:* ${pedido.nombreCliente || "Nueva Compradora"}\n` +
                       `💳 *DNI/RUC:* ${pedido.dniCliente}\n\n` +
-                      `📦 *Productos Seleccionados:*\n${listaTexto}\n` +
-                      `💰 *Monto Estimado:* S/ ${pedido.precioVenta.toFixed(2)}\n\n` +
-                      `⚙️ _Pedido registrado automáticamente en el catálogo virtual._`;
+                      `📦 *Mis Productos Seleccionados:*\n${listaTexto}\n` +
+                      `💰 *Total a pagar:* S/ ${pedido.precioVenta.toFixed(2)}\n\n` +
+                      `⚙️ _Pedido enviado automáticamente desde el catálogo virtual MiaShop._`;
 
       const link = `https://wa.me/${numeroCelularAdmin}?text=${encodeURIComponent(mensaje)}`;
       window.open(link, '_blank');
@@ -1095,7 +1103,7 @@
 
       // Renderizar Pedidos Activos
       if (activos.length === 0) {
-        activosContainer.innerHTML = `<p class="text-xs text-gray-400 italic">No tienes pedidos en progreso de despacho.</p>`;
+        activosContainer.innerHTML = `<p class="text-xs text-gray-400 italic text-center py-4">No tienes pedidos en progreso de despacho.</p>`;
       } else {
         activos.forEach(p => {
           let listaHtml = "";
@@ -1177,7 +1185,7 @@
                   <p class="font-extrabold text-[#7D5A94] text-base">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
                 </div>
                 <!-- Botón de boleta proporcional y centrado -->
-                <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all flex-shrink-0">
+                <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0">
                   📄 Ver Boleta
                 </button>
               </div>
