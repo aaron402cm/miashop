@@ -118,24 +118,24 @@
   <!-- Contenedor de Estrellas para el Modo Nocturno -->
   <div id="night-stars-container" class="fixed inset-0 z-0 pointer-events-none overflow-hidden hidden"></div>
 
-  <!-- ==================== HEADER (SOL/LUNA CONTROL DE MODO) ==================== -->
+  <!-- ==================== HEADER (SOL/LUNA CONTROL DE MODO - CARRITO REDISEÑADO COMPACTO) ==================== -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-1.5">
-        <!-- Icono inteligente para verificar/cambiar el modo nocturno -->
+      <div class="flex items-center gap-2">
         <button onclick="toggleModoNocturnoManual()" id="btn-modo-icon" class="text-2xl cursor-pointer select-none hover:scale-110 transition-transform" title="Cambiar Modo de Luz">
           ☀️
         </button>
         <h1 class="font-magic text-2xl font-bold text-[#7D5A94]">MiaShop</h1>
       </div>
       
-      <div class="flex items-center gap-4">
-        <button onclick="toggleSonido()" id="btn-sonido" class="p-2 text-xl hover:bg-purple-50 rounded-full transition-colors">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSonido()" id="btn-sonido" class="p-2 text-2xl hover:bg-purple-50 rounded-full transition-colors">
           🔊
         </button>
-        <button onclick="cambiarSeccion('carrito')" class="relative flex items-center gap-2 bg-[#7D5A94] text-white px-4 py-2 rounded-full text-base font-semibold hover:bg-[#6a4c7e] transition-colors">
-          <span>🛒 Mi Compra</span>
-          <span id="carrito-contador" class="bg-[#F2846B] text-white text-sm font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
+        <!-- Carrito Compacto Circular sin Texto -->
+        <button onclick="cambiarSeccion('carrito')" class="relative flex items-center justify-center bg-[#7D5A94] text-white w-12 h-12 rounded-full hover:bg-[#6a4c7e] transition-all">
+          <span class="text-2xl">🛒</span>
+          <span id="carrito-contador" class="absolute -top-1.5 -right-1.5 bg-[#F2846B] text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
         </button>
       </div>
     </div>
@@ -199,13 +199,13 @@
       <!-- Mascota MIMI Compacta (Mensaje ARRIBA del gatito - Temporizada a 10s) -->
       <div id="mascota-contenedor" class="flex flex-col items-center justify-center py-2 max-w-sm mx-auto hidden transition-all duration-700 overflow-hidden">
         <!-- Burbuja de diálogo arriba -->
-        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-sm font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
+        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
           <span id="mascota-frase">¡Qué excelente elección! Es uno de nuestros favoritos.</span>
         </div>
         <!-- Gatito abajo -->
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <span class="text-5xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
-          <span class="text-xs font-extrabold text-purple-400">MIMI</span>
+          <span class="text-4xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
+          <span class="text-[9px] font-extrabold text-purple-400">MIMI</span>
         </div>
       </div>
 
@@ -218,14 +218,14 @@
           <span>Subtotal estimado</span>
           <span id="totales-subtotal">S/ 0.00</span>
         </div>
-        <div class="flex justify-between items-center text-xl font-bold text-gray-800 border-t border-purple-100 pt-3">
+        <div class="flex justify-between items-center text-lg font-bold text-gray-800 border-t border-purple-100 pt-3">
           <span>Total a Pagar</span>
           <span id="totales-total" class="text-[#F2846B]">S/ 0.00</span>
         </div>
         
         <!-- Botón de Registro de Pedido -->
         <div class="pt-4">
-          <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-lg py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
+          <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-base py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
             ✨ Registrar mi Pedido y continuar
           </button>
         </div>
@@ -305,7 +305,7 @@
     </div>
   </nav>
 
-  <!-- ==================== MODAL: DETALLES DE PRODUCTO (CORREGIDO GALERÍA CON FLAGS) ==================== -->
+  <!-- ==================== MODAL: DETALLES DE PRODUCTO ==================== -->
   <div id="modal-detalle-producto" class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 border border-purple-100 max-h-[90vh] overflow-y-auto">
       
@@ -357,7 +357,7 @@
       <div class="space-y-3">
         <p class="text-sm text-gray-500 leading-relaxed text-center font-medium">Para completar tu orden, ingresa tu DNI. Sincronizaremos tus datos automáticamente.</p>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1 text-center">DNI / RUC de Clienta</label>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 text-center">DNI / RUC de Clienta</label>
           <input type="number" id="form-dni" placeholder="Ingresa tu número de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider transition-all" required>
         </div>
       </div>
@@ -438,7 +438,12 @@
     // Variables de Estado de la Aplicación
     let catalogoProductos = [];
     let categoriasLocal = [];
-    let carrito = JSON.parse(localStorage.getItem('mia_catalog_cart')) || [];
+    let carrito = [];
+    try {
+      carrito = JSON.parse(localStorage.getItem('mia_catalog_cart')) || [];
+    } catch(e) {
+      carrito = [];
+    }
     let soundEnabled = localStorage.getItem('mia_sound_enabled') !== '0';
     let categoriaSeleccionada = 'Todas';
     let productoPorAgregar = null;
@@ -446,7 +451,7 @@
     let intervalCarousel = null;
     let mimiTimer = null; 
     let audioCtxShared = null; 
-    let modoNocturnoManual = localStorage.getItem('mia_modo_nocturno_manual'); // 'day', 'night' o null
+    let modoNocturnoManual = localStorage.getItem('mia_modo_nocturno_manual'); 
 
     // 100 Frases de Refuerzo Positivo para la Mascota MIMI
     const frasesMascota = [
@@ -460,7 +465,7 @@
       "¡Una maravilla de elección! Este producto tiene un acabado único.",
       "¡Qué buena elección has hecho, te felicito de corazón!",
       "¡Perfecto! Un producto diseñado para deslumbrar.",
-      "¡Esto es una joda de buen gusto! Te hace muy feliz que lo leves.",
+      "¡Esto es una joya de buen gusto! Te hace muy feliz que lo lleves.",
       "¡Muy bien pensado! Es un artículo súper útil y hermoso.",
       "¡Qué estilo tienes! Tus elecciones siempre son de primer nivel.",
       "¡Es bellísimo! Te aseguro que recibirás muchos cumplidos.",
@@ -524,7 +529,7 @@
       "¡Muy inteligente de tu parte elegir este producto hoy!",
       "¡Qué selección tan sobresaliente! Has escogido con sabiduría.",
       "¡Un aplauso para tu carrito de compras! Excelente combinación.",
-      "¡Es una verdadera joda de buen gusto! Te aseguro que querrás pedir otro pronto.",
+      "¡Es una verdadera joya de buen gusto! Te aseguro que querrás pedir otro pronto.",
       "¡Qué decisión tan acertada! Un producto sumamente elegante.",
       "¡Maravillosa elección! Un producto lleno de detalles encantadores.",
       "¡Una compra fantástica! Es de lo más duradero y fino que tenemos.",
@@ -560,7 +565,6 @@
       }
 
       const hora = new Date().getHours();
-      // Activar automáticamente de 19:00 (7 PM) a 06:00 (6 AM)
       const esNocturno = (hora >= 19 || hora < 6);
       aplicarModoNocturno(esNocturno);
     }
@@ -748,11 +752,11 @@
     function iniciarCarruselBanner() {
       if (catalogoProductos.length === 0) return;
       
-      const productosConImágenes = catalogoProductos.filter(p => p.imagen1);
-      if (productosConImágenes.length === 0) return;
+      const productosConImagenes = catalogoProductos.filter(p => p.imagen1);
+      if (productosConImagenes.length === 0) return;
 
       const imgEl = document.getElementById('carousel-img');
-      imgEl.src = productosConImágenes[0].imagen1;
+      imgEl.src = productosConImagenes[0].imagen1;
 
       if (intervalCarousel) clearInterval(intervalCarousel);
 
@@ -760,8 +764,8 @@
         imgEl.classList.add('fade-out-left');
 
         setTimeout(() => {
-          indexCarousel = (indexCarousel + 1) % productosConImágenes.length;
-          imgEl.src = productosConImágenes[indexCarousel].imagen1;
+          indexCarousel = (indexCarousel + 1) % productosConImagenes.length;
+          imgEl.src = productosConImagenes[indexCarousel].imagen1;
           imgEl.classList.remove('fade-out-left');
         }, 800); 
 
@@ -791,7 +795,6 @@
       renderizarCatalogo();
     }
 
-    // ==================== RENDERIZACIÓN DE PRODUCTOS EN CATÁLOGO ====================
     function renderizarCatalogo() {
       const grid = document.getElementById('catalogo-grid');
       const query = document.getElementById('input-busqueda').value.toLowerCase().trim();
@@ -817,7 +820,11 @@
         const img = prod.imagen1 || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=250';
         
         let etiquetaHtml = "";
-        const idNum = parseInt(prod.sku.replace("MIA-", ""));
+        
+        // Validación robusta de SKU para prevenir caídas de carga
+        const skuStr = prod.sku ? String(prod.sku) : "";
+        const idNum = parseInt(skuStr.replace("MIA-", "")) || 0;
+        
         if (idNum % 3 === 0) {
           etiquetaHtml = `<span class="absolute top-3 left-3 bg-[#F2846B] text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10 uppercase">🔥 Oferta</span>`;
         } else if (idNum % 5 === 0) {
@@ -839,7 +846,7 @@
             <div class="mt-4 border-t border-purple-50/50 pt-3 flex items-center justify-between">
               <div class="flex flex-col">
                 <span class="text-xs text-gray-400 uppercase font-semibold">Precio S/</span>
-                <span class="text-xl font-extrabold text-[#F2846B]">S/ ${parseFloat(prod.precioVenta).toFixed(2)}</span>
+                <span class="text-xl font-extrabold text-[#F2846B]">S/ ${parseFloat(prod.precioVenta || 0).toFixed(2)}</span>
               </div>
               <button onclick="event.stopPropagation(); solicitarAgregarAlCarrito('${prod.sku}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-colors">
                 <span>🛒 Comprar</span>
@@ -871,7 +878,7 @@
 
         document.getElementById('det-nombre').textContent = prod.nombre;
         document.getElementById('det-sku-cat').textContent = `${prod.sku} | ${prod.categoria}`;
-        document.getElementById('det-precio').textContent = `S/ ${parseFloat(prod.precioVenta).toFixed(2)}`;
+        document.getElementById('det-precio').textContent = `S/ ${parseFloat(prod.precioVenta || 0).toFixed(2)}`;
         document.getElementById('det-descripcion').textContent = prod.descripcion || "Sin descripción por el momento.";
       }
 
@@ -1081,7 +1088,7 @@
       modal.classList.remove('opacity-100');
     }
 
-    // ==================== ENVÍO AUTOMÁTICO A APPS SCRIPT ====================
+    // ==================== ENVÍO AUTOMÁTICO A APPS SCRIPT (CORS) ====================
     function procesarConfirmacionPedido() {
       const dni = document.getElementById('form-dni').value.trim();
 
@@ -1244,7 +1251,7 @@
                 <span class="text-gray-400 font-medium">${p.fecha.substring(0,10)}</span>
               </div>
               <div class="text-base font-medium leading-relaxed">${listaHtml}</div>
-              <div class="flex justify-between items-center text-sm pt-2 border-t">
+              <div class="flex justify-between items-center text-base pt-2 border-t">
                 <span class="text-xs text-gray-400">Total Pedido:</span>
                 <span class="font-bold text-[#F2846B]">S/ ${parseFloat(p.precioVenta).toFixed(2)}</span>
               </div>
@@ -1277,15 +1284,15 @@
                 <span class="text-[10px] text-gray-400 font-medium">${p.fecha.substring(0, 10)}</span>
               </div>
               
-              <div class="text-sm text-gray-700 font-medium space-y-1">
+              <div class="text-xs text-gray-700 font-medium space-y-1">
                 ${itemsHtml}
               </div>
 
               <!-- Footer ordenado con espaciado proporcional -->
               <div class="flex items-center justify-between pt-3 border-t border-emerald-100/50 gap-4">
                 <div>
-                  <p class="text-[10px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
-                  <p class="font-extrabold text-[#7D5A94] text-lg">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
+                  <p class="text-[9px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
+                  <p class="font-extrabold text-[#7D5A94] text-base">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
                 </div>
                 <!-- Botón de boleta proporcional y centrado -->
                 <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all flex-shrink-0">
