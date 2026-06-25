@@ -29,27 +29,26 @@
     .btn-large {
       min-height: 50px;
     }
-    /* Estilos para el carrusel de desvanecimiento */
     .fade-carousel-img {
       transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
     }
     .fade-out-left {
       opacity: 0;
-      transform: translateX(-20px);
+      transform: scale(0.95);
     }
     .fade-in {
       opacity: 1;
-      transform: translateX(0);
+      transform: scale(1);
     }
-    /* Burbuja de diálogo de la mascota */
-    .speech-bubble {
+    /* Burbuja de diálogo de la mascota orientada en la parte superior */
+    .speech-bubble-top {
       position: relative;
       background: #ffffff;
-      border: 2px solid #7D5A94;
+      border: 2px solid #D6C2E2;
     }
-    .speech-bubble:after, .speech-bubble:before {
-      left: 100%;
-      top: 50%;
+    .speech-bubble-top:after, .speech-bubble-top:before {
+      top: 100%;
+      left: 50%;
       border: solid transparent;
       content: " ";
       height: 0;
@@ -57,35 +56,17 @@
       position: absolute;
       pointer-events: none;
     }
-    .speech-bubble:after {
+    .speech-bubble-top:after {
       border-color: rgba(255, 255, 255, 0);
-      border-left-color: #ffffff;
+      border-top-color: #ffffff;
       border-width: 8px;
-      margin-top: -8px;
+      margin-left: -8px;
     }
-    .speech-bubble:before {
-      border-color: rgba(125, 90, 148, 0);
-      border-left-color: #7D5A94;
-      border-width: 11px;
-      margin-top: -11px;
-    }
-    @media (max-width: 640px) {
-      .speech-bubble:after, .speech-bubble:before {
-        left: 50%;
-        top: 100%;
-      }
-      .speech-bubble:after {
-        border-left-color: transparent;
-        border-top-color: #ffffff;
-        margin-left: -8px;
-        margin-top: 0;
-      }
-      .speech-bubble:before {
-        border-left-color: transparent;
-        border-top-color: #7D5A94;
-        margin-left: -11px;
-        margin-top: 0;
-      }
+    .speech-bubble-top:before {
+      border-color: rgba(214, 194, 226, 0);
+      border-top-color: #D6C2E2;
+      border-width: 10px;
+      margin-left: -10px;
     }
   </style>
 </head>
@@ -117,17 +98,23 @@
     <!-- PANTALLA: CATÁLOGO -->
     <section id="sec-catalogo" class="space-y-6 block">
       
-      <!-- Banner de Bienvenida con Carrusel de Desvanecimiento -->
-      <div class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden min-h-[200px]">
-        <div class="space-y-2 z-10 flex-1">
+      <!-- Banner de Bienvenida inteligente (Inicia con Texto, luego cambia a Diapositiva) -->
+      <div id="banner-principal" class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md flex items-center justify-center min-h-[200px] relative overflow-hidden transition-all duration-700">
+        
+        <!-- Vista Inicial: Texto "Importaciones Mágicas" -->
+        <div id="banner-vista-texto" class="text-center space-y-2 z-10 transition-opacity duration-700">
           <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">On-Demand</span>
           <h2 class="font-magic text-3xl font-bold">Importaciones Mágicas</h2>
-          <p class="text-sm text-purple-100 max-w-sm">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
+          <p class="text-sm text-purple-100 max-w-sm mx-auto">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
         </div>
         
-        <!-- Visor del Carrusel -->
-        <div class="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden bg-white/20 border border-white/30 flex items-center justify-center relative flex-shrink-0 z-10 shadow-inner">
+        <!-- Vista Secundaria: Carrusel a Pantalla Completa (Se activa tras 2.5s) -->
+        <div id="banner-vista-carousel" class="absolute inset-0 w-full h-full opacity-0 hidden transition-opacity duration-700">
           <img id="carousel-img" src="" class="w-full h-full object-cover fade-carousel-img" alt="Producto del catálogo">
+          <!-- Difuminado decorativo sobre las diapositivas -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10 flex items-end p-4">
+            <span class="bg-[#7D5A94] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm z-10 uppercase">✨ Tendencia MiaShop</span>
+          </div>
         </div>
       </div>
 
@@ -145,7 +132,7 @@
       </div>
 
       <!-- Estado de carga -->
-      <div id="catalogo-cargando" class="text-center py-20 space-y-3">
+      <div id="catalogo-cargando" class="text-center py-10 space-y-3">
         <span class="text-4xl animate-spin inline-block">🪄</span>
         <p class="text-sm text-gray-500 font-medium">Consultando el catálogo con Apps Script...</p>
       </div>
@@ -161,14 +148,16 @@
         <button onclick="vaciarCarrito()" class="text-xs text-red-500 hover:underline font-semibold text-left">Vaciar Carrito</button>
       </div>
 
-      <!-- Mascota Flotante que saluda y felicita -->
-      <div id="mascota-contenedor" class="bg-purple-50/40 border border-purple-100 p-4 rounded-3xl flex flex-col sm:flex-row items-center gap-4 hidden">
-        <div class="flex-1 speech-bubble p-4 rounded-2xl text-xs sm:text-sm font-medium text-[#7D5A94] order-2 sm:order-1 text-center sm:text-right">
+      <!-- Mascota MIMI Compacta (Mensaje ARRIBA del gatito) -->
+      <div id="mascota-contenedor" class="flex flex-col items-center justify-center py-2 max-w-sm mx-auto hidden animate-fadeIn">
+        <!-- Burbuja de diálogo arriba -->
+        <div class="speech-bubble-top relative bg-white border-2 border-purple-200 text-[#7D5A94] text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-sm text-center max-w-xs mb-3">
           <span id="mascota-frase">¡Qué excelente elección! Es uno de nuestros favoritos.</span>
         </div>
-        <div class="text-center flex-shrink-0 order-1 sm:order-2">
-          <span class="text-5xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
-          <p class="text-[10px] font-bold text-purple-400 mt-1">MIMI</p>
+        <!-- Gatito abajo -->
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <span class="text-4xl inline-block animate-bounce" style="animation-duration: 3s;">🐱✨</span>
+          <span class="text-[9px] font-extrabold text-purple-400">MIMI</span>
         </div>
       </div>
 
@@ -186,7 +175,7 @@
           <span id="totales-total" class="text-[#F2846B]">S/ 0.00</span>
         </div>
         
-        <!-- Único Botón de Acción -->
+        <!-- Botón de Registro de Pedido -->
         <div class="pt-4">
           <button onclick="abrirModalCheckout()" class="w-full btn-large bg-[#F2846B] hover:bg-[#e0725a] text-white font-bold text-base py-3.5 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
             ✨ Registrar mi Pedido y continuar
@@ -210,13 +199,13 @@
         <p class="text-xs text-gray-500">Introduce tu documento de identidad para conocer el estado actual y ver tus boletas.</p>
       </div>
 
-      <!-- Buscador de DNI Centrado y con Ancho Controlado -->
-      <div class="bg-white p-6 rounded-3xl border border-purple-100 space-y-4 max-w-md mx-auto shadow-sm">
+      <!-- Buscador de DNI Centrado y con Ancho Controlado (Sin desbordamientos) -->
+      <div class="bg-white p-6 rounded-3xl border border-purple-100 space-y-4 max-w-sm mx-auto shadow-sm">
         <div class="space-y-2">
           <label class="block text-xs font-bold text-[#7D5A94] uppercase text-center">Introduce tu DNI de Clienta</label>
-          <div class="flex flex-col sm:flex-row gap-2">
-            <input type="number" id="input-dni-consulta" placeholder="Ej: 45678912" class="flex-1 px-4 py-3 rounded-xl border border-purple-200 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider">
-            <button onclick="consultarPedidosDNI()" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-6 py-3 rounded-xl font-semibold transition-colors btn-large">Consultar</button>
+          <div class="flex flex-col gap-2">
+            <input type="number" id="input-dni-consulta" placeholder="Ej: 45678912" class="w-full px-4 py-3 rounded-xl border border-purple-200 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider">
+            <button onclick="consultarPedidosDNI()" class="w-full bg-[#7D5A94] hover:bg-[#68497d] text-white px-6 py-3.5 rounded-xl font-semibold transition-colors btn-large text-sm">Consultar Pedido</button>
           </div>
         </div>
       </div>
@@ -252,31 +241,29 @@
 
   <!-- ==================== BARRA DE NAVEGACIÓN MÓVIL ==================== -->
   <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-purple-100 shadow-xl z-40">
-    <div class="max-w-4xl mx-auto flex justify-around items-center h-20">
-      <button onclick="cambiarSeccion('catalogo')" id="nav-catalogo" class="flex flex-col items-center justify-center w-24 text-[#7D5A94]">
-        <span class="text-2xl">🏠</span>
-        <span class="text-[10px] font-bold mt-1 uppercase">Catálogo</span>
+    <div class="max-w-4xl mx-auto flex justify-around items-center h-20 px-2">
+      <button onclick="cambiarSeccion('catalogo')" id="nav-catalogo" class="flex flex-col items-center justify-center w-20 py-2 text-[#7D5A94] bg-purple-100/50 rounded-2xl font-bold transition-all">
+        <span class="text-xl">🏠</span>
+        <span class="text-[9px] font-bold mt-1 uppercase">Catálogo</span>
       </button>
-      <button onclick="cambiarSeccion('carrito')" id="nav-carrito" class="flex flex-col items-center justify-center w-24 text-gray-400 hover:text-[#7D5A94]">
-        <span class="text-2xl">🛒</span>
-        <span class="text-[10px] font-bold mt-1 uppercase">Mi Compra</span>
+      <button onclick="cambiarSeccion('carrito')" id="nav-carrito" class="flex flex-col items-center justify-center w-20 py-2 text-gray-400 hover:text-[#7D5A94] transition-all">
+        <span class="text-xl">🛒</span>
+        <span class="text-[9px] font-bold mt-1 uppercase">Mi Compra</span>
       </button>
-      <button onclick="cambiarSeccion('pedidos')" id="nav-pedidos" class="flex flex-col items-center justify-center w-24 text-gray-400 hover:text-[#7D5A94]">
-        <span class="text-2xl">🚚</span>
-        <span class="text-[10px] font-bold mt-1 uppercase">Seguimiento</span>
+      <button onclick="cambiarSeccion('pedidos')" id="nav-pedidos" class="flex flex-col items-center justify-center w-20 py-2 text-gray-400 hover:text-[#7D5A94] transition-all">
+        <span class="text-xl">🚚</span>
+        <span class="text-[9px] font-bold mt-1 uppercase">Seguimiento</span>
       </button>
     </div>
   </nav>
 
-  <!-- ==================== MODAL: DETALLES DE PRODUCTO (NUEVO) ==================== -->
+  <!-- ==================== MODAL: DETALLES DE PRODUCTO ==================== -->
   <div id="modal-detalle-producto" class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
     <div class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-5 border border-purple-100 max-h-[90vh] overflow-y-auto">
       
       <!-- Cabecera modal de detalles -->
       <div class="flex justify-between items-center border-b pb-3 border-purple-100">
-        <button onclick="cerrarModalDetalle()" class="text-[#7D5A94] font-bold text-sm hover:underline flex items-center gap-1.5">
-          <span>⬅️ Regresar a la tienda</span>
-        </button>
+        <h4 class="font-magic text-lg font-bold text-[#7D5A94]">Detalles del Producto</h4>
         <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">&times;</button>
       </div>
 
@@ -299,55 +286,37 @@
         </div>
       </div>
 
-      <!-- Botón para añadir directamente -->
-      <div class="pt-2">
-        <button id="det-btn-comprar" class="w-full btn-large bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-base py-3 px-6 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
-          <span>🛒 Agregar al carrito</span>
+      <!-- Botonera de Compra y Botón de Regresar Ampliado -->
+      <div class="flex gap-3 pt-2">
+        <button onclick="cerrarModalDetalle()" class="flex-1 py-3.5 border border-purple-200 text-[#7D5A94] rounded-xl font-bold text-sm bg-purple-50 hover:bg-purple-100 transition-colors">
+          ⬅️ Regresar
+        </button>
+        <button id="det-btn-comprar" class="flex-1 py-3.5 bg-[#7D5A94] hover:bg-[#68497d] text-white font-bold text-sm rounded-xl transition-all shadow-md">
+          🛒 Comprar
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL: FORMULARIO DE ENVÍO / CHECKOUT (NUEVO) ==================== -->
+  <!-- ==================== MODAL: CHECKOUT SIMPLIFICADO (SOLO DNI) ==================== -->
   <div id="modal-checkout" class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 border border-purple-100">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 border border-purple-100">
       <div class="flex justify-between items-center border-b pb-3 border-purple-50">
-        <h3 class="font-magic text-xl font-bold text-[#7D5A94]">Información de Envío</h3>
+        <h3 class="font-magic text-xl font-bold text-[#7D5A94]">Verificación</h3>
         <button onclick="cerrarModalCheckout()" class="text-gray-400 text-2xl font-bold hover:text-gray-600 leading-none">&times;</button>
       </div>
       
       <div class="space-y-3">
+        <p class="text-xs text-gray-500 leading-relaxed text-center">Para completar tu orden, ingresa tu DNI. Sincronizaremos tus datos automáticamente.</p>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">DNI / RUC (Requerido)</label>
-          <input type="number" id="form-dni" placeholder="Ingresa tu documento de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all" required>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tu Nombre Completo</label>
-          <input type="text" id="form-nombre" placeholder="Nombre y Apellidos" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all" required>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Departamento de Destino</label>
-          <select id="form-departamento" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] bg-white text-base transition-all">
-            <option value="Lima">Lima</option>
-            <option value="Máncora">Máncora</option>
-            <option value="Arequipa">Arequipa</option>
-            <option value="La Libertad">La Libertad</option>
-            <option value="Piura">Piura</option>
-            <option value="Cusco">Cusco</option>
-          </select>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Notas del Pedido</label>
-          <textarea id="form-notas" rows="2" placeholder="Indicaciones para la entrega..." class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-base transition-all"></textarea>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 text-center">DNI / RUC de Clienta</label>
+          <input type="number" id="form-dni" placeholder="Ingresa tu número de identidad" class="w-full px-4 py-3 rounded-xl border border-purple-100 outline-none focus:border-[#7D5A94] text-center text-lg font-bold tracking-wider transition-all" required>
         </div>
       </div>
 
       <div class="flex gap-2 pt-3">
-        <button onclick="cerrarModalCheckout()" class="flex-1 py-3.5 border border-purple-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50">Atrás</button>
-        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3.5 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
+        <button onclick="cerrarModalCheckout()" class="flex-1 py-3 border border-purple-200 text-gray-500 rounded-xl font-semibold text-sm hover:bg-gray-50">Atrás</button>
+        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-sm hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
       </div>
     </div>
   </div>
@@ -407,7 +376,7 @@
   <!-- ==================== CÓDIGO JS INTEGRAL ==================== -->
   <script>
     // URL Web App de Google Apps Script
-    const API_URL = "https://script.google.com/macros/s/AKfycbyGMVq7Ricbcjy5Hcnwg2frnOr9MbsSelytAdI_YWEF4HAorDJfy_ZA5_BRGvdMO-ik/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyC2n3Z2P7N0D5qQ70-U8Yk_xWpIu8v14bN0wA9f8/exec";
 
     // Variables de Estado de la Aplicación
     let catalogoProductos = [];
@@ -419,129 +388,41 @@
     let indexCarousel = 0;
     let intervalCarousel = null;
 
-    // 100 Frases de Refuerzo Positivo para la Mascota
-    const frasesMascota = [
-      "¡Qué excelente elección! Es uno de nuestros favoritos.",
-      "¡Tienes un gusto increíble! Este pedido te va a encantar.",
-      "¡Qué gran ojo tienes para la calidad! Te felicito de corazón.",
-      "¡Este producto es espectacular! Te aseguro que te lucirá genial.",
-      "¡Una decisión muy inteligente! Calidad y belleza en un solo pedido.",
-      "¡Me alegra tanto ver esto en tu carrito! Te va a encantar.",
-      "¡Precioso! Realmente sabes cómo seleccionar lo mejor.",
-      "¡Una maravilla de elección! Este producto tiene un acabado único.",
-      "¡Qué buena elección has hecho, te felicito de corazón!",
-      "¡Perfecto! Un producto diseñado para deslumbrar.",
-      "¡Esto es una joya! Me hace muy feliz que lo lleves.",
-      "¡Muy bien pensado! Es un artículo súper útil y hermoso.",
-      "¡Qué estilo tienes! Tus elecciones siempre son de primer nivel.",
-      "¡Es bellísimo! Te aseguro que recibirás muchos cumplidos.",
-      "¡Gran elección! Es uno de los productos más elogiados por nuestras clientas.",
-      "¡Excelente gusto! Le dará un toque mágico a tu día a día.",
-      "¡Lindo detalle! Este producto transmite muchísima calidez.",
-      "¡Una compra inteligente! Disfrutarás este producto cada segundo.",
-      "¡Me fascina tu carrito! Cada pieza es perfecta.",
-      "¡Qué elegancia! Un artículo que marca la diferencia.",
-      "¡Magnífica compra! Cumple con todo lo que necesitas y más.",
-      "¡Vaya combinación de belleza y utilidad! Te felicito.",
-      "¡Espectacular! Has elegido un producto súper exclusivo.",
-      "¡Es un tesoro! Me encanta que lo hayas elegido hoy.",
-      "¡Qué acierto! Este producto resolverá tus necesidades con estilo.",
-      "¡Una obra de arte! Su diseño es simplemente encantador.",
-      "¡No te arrepentirás de esta compra, es fabulosa!",
-      "¡Encantador! Es el complemento perfecto para tu colección.",
-      "¡Qué gran decisión! Un producto que realmente vale oro.",
-      "¡Fabuloso! Destaca por su gran diseño y practicidad.",
-      "¡Es una delicia ver tu carrito! Tienes un gusto fenomenal.",
-      "¡Qué bien se siente elegir calidad! Has hecho una compra de diez.",
-      "¡Súper recomendado! Te aseguro una satisfacción total.",
-      "¡Este producto tiene un encanto único! Muy buena elección.",
-      "¡Qué alegría! Has seleccionado un artículo de primer nivel.",
-      "¡Un artículo maravilloso! Ideal para alguien con tu estilo.",
-      "¡Un acierto absoluto! Es de lo más pedido del mes.",
-      "¡Brillante elección! Práctico, estético y de gran durabilidad.",
-      "¡Sencillamente perfecto! No podías haber escogido algo mejor.",
-      "¡Qué gran día de compras! Tus selecciones son impecables.",
-      "¡Esto te va a encantar! Es una de nuestras mayores recomendaciones.",
-      "¡Estilo y buen gusto en un solo pedido! Me fascina.",
-      "¡Tu carrito brilla hoy! Qué hermosos productos elegiste.",
-      "¡Te felicito! Has optado por un producto con un estándar muy alto.",
-      "¡Qué detalle tan especial! Marcando tendencia como siempre.",
-      "¡Felicidades por tu compra! Es una fantástica adquisición.",
-      "¡Único y original! Este producto complementará todo lo que tienes.",
-      "¡Me encanta tu compra! Es un producto súper especial.",
-      "¡Excelente ojo! La relación calidad-precio aquí es maravillosa.",
-      "¡Qué felicidad! Te aseguro que disfrutarás abrir este paquete.",
-      "¡Definitivamente una de tus mejores elecciones de la temporada!",
-      "¡La magia de MiaShop te acompañará con este hermoso producto!",
-      "¡Qué gran gusto! Te aseguro que tus conocidas te preguntarán dónde lo compraste.",
-      "¡Este artículo es toda una experiencia! Te fascinará tenerlo.",
-      "¡La combinación perfecta de modernidad y buen gusto!",
-      "¡Qué gran elección! Ideal para renovar tus espacios o tu estilo.",
-      "¡Muy buena compra! Es un producto que destaca a simple vista.",
-      "¡Hermosa selección! Hecha con el corazón para alguien como tú.",
-      "¡Este producto es un clásico que nunca falla! Magnífico gusto.",
-      "¡Qué acierto tan grande! Un producto que facilitará tu rutina.",
-      "¡Me encanta! Un artículo diseñado para complacer el gusto más exigente.",
-      "¡Esto te va a traer muchísima felicidad, te lo garantizo!",
-      "¡Perfecto para engreírte hoy! Te lo mereces por completo.",
-      "¡Qué gusto tan fino! Tus selecciones hablan de tu gran personalidad.",
-      "¡Una adquisición fantástica! Calidad duradera y hermosa.",
-      "¡Qué gran adquisición! Te aseguro que superará tus expectativas.",
-      "¡Una compra de la que te sentirás muy orgullosa! Excelente.",
-      "¡Precioso detalle! Este producto es pura distinción.",
-      "¡Qué maravilla de producto! Todo un acierto comercial.",
-      "¡Una lección de buen gusto! Tu carrito es un ejemplo de estilo.",
-      "¡Es una preciosidad! Ideal para complementar tu hogar con elegancia.",
-      "¡Muy inteligente de tu parte elegir este producto hoy!",
-      "¡Qué selección tan sobresaliente! Has escogido con sabiduría.",
-      "¡Un aplauso para tu carrito de compras! Excelente combinación.",
-      "¡Es una verdadera joya! Te aseguro que querrás pedir otro pronto.",
-      "¡Qué decisión tan acertada! Un producto sumamente elegante.",
-      "¡Maravillosa elección! Un producto lleno de detalles encantadores.",
-      "¡Una compra fantástica! Es de lo más duradero y fino que tenemos.",
-      "¡Qué bien elegiste hoy! Es un producto ideal en todos los sentidos.",
-      "¡Me fascina esta elección! Tiene un acabado sumamente prolijo.",
-      "¡Súper elección! Destaca por su funcionalidad y apariencia de lujo.",
-      "¡Te va a lucir increíble! Un toque mágico para ti.",
-      "¡Qué gran gusto! Has elegido un producto súper exclusivo y moderno.",
-      "¡Una decisión magnífica! Te traerá mucha comodidad y alegría.",
-      "¡Felicidades por tan excelente gusto! Me alegra mucho tu carrito.",
-      "¡Un artículo sumamente distinguido! Excelente adquisición.",
-      "¡Qué gran ojo tienes para lo práctico e innovador! Te felicito.",
-      "¡Es un sueño de producto! Su suavidad y diseño te cautivarán.",
-      "¡Has elegido un tesoro que te acompañará por mucho tiempo!",
-      "¡Qué linda sorpresa te llevarás al recibir esta maravilla!",
-      "¡Me encanta que te consientas con productos tan finos como este!",
-      "¡Has tomado una decisión fantástica, es un producto sensacional!",
-      "¡Una gran compra! No hay duda de que sabes elegir lo mejor.",
-      "¡Qué selección tan bella y oportuna para tu día a día!",
-      "¡Impecable! Un producto de calidad garantizada para tu hogar.",
-      "¡Qué gran gusto tienes! Este producto te lucirá espectacular.",
-      "¡Una elección maravillosa! Hará tu vida mucho más práctica.",
-      "¡Espectacular! Has escogido una de las piezas más finas de nuestra colección.",
-      "¡Qué gran decisión! Un producto súper versátil que te encantará usar.",
-      "¡Excelente gusto! Me alegra que hayas encontrado este producto en MiaShop."
-    ];
-
-    // Registrar Service Worker para soporte offline
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registrado con éxito', reg))
-          .catch(err => console.warn('No se pudo registrar el Service Worker', err));
-      });
-    }
-
     // Inicialización del catálogo
     document.addEventListener("DOMContentLoaded", () => {
       actualizarContadorCarrito();
       cargarCatalogoServidor();
       configurarUI();
+      inicializarEfectoBanner(); // Activa el efecto del banner
     });
 
     function configurarUI() {
       const btn = document.getElementById('btn-sonido');
       btn.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+
+    // ==================== EFECTO INTELIGENTE DEL BANNER ====================
+    function inicializarEfectoBanner() {
+      // Pasados 2.5 segundos, ocultar el texto inicial y dar paso a la diapositiva grande
+      setTimeout(() => {
+        const vistaTexto = document.getElementById('banner-vista-texto');
+        const vistaCarousel = document.getElementById('banner-vista-carousel');
+        const banner = document.getElementById('banner-principal');
+
+        if (vistaTexto && vistaCarousel) {
+          vistaTexto.classList.add('opacity-0');
+          setTimeout(() => {
+            vistaTexto.classList.add('hidden');
+            vistaCarousel.classList.remove('hidden');
+            setTimeout(() => {
+              vistaCarousel.classList.remove('opacity-0');
+              vistaCarousel.classList.add('opacity-100');
+              banner.classList.remove('p-6'); // Reduce relleno para ganar espacio vertical
+              banner.classList.add('p-0'); 
+            }, 50);
+          }, 700);
+        }
+      }, 2500);
     }
 
     // ==================== SONIDOS SINTETIZADOS ====================
@@ -573,6 +454,25 @@
       }
     }
 
+    function playNavTap() {
+      if (!soundEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } catch(e){}
+    }
+
     function toggleSonido() {
       soundEnabled = !soundEnabled;
       localStorage.setItem('mia_sound_enabled', soundEnabled ? '1' : '0');
@@ -582,22 +482,24 @@
 
     // ==================== CAMBIO DE PANTALLAS (SPA) ====================
     function cambiarSeccion(seccionId) {
+      playNavTap(); // Reproducir sonido agradable de navegación
+      
       const secciones = ['catalogo', 'carrito', 'pedidos'];
       secciones.forEach(id => {
         document.getElementById('sec-' + id).classList.add('hidden');
         document.getElementById('sec-' + id).classList.remove('block');
         
         const navBtn = document.getElementById('nav-' + id);
-        navBtn.classList.add('text-gray-400');
-        navBtn.classList.remove('text-[#7D5A94]');
+        // Reset a estado inactivo
+        navBtn.className = "flex flex-col items-center justify-center w-20 py-2 text-gray-400 hover:text-[#7D5A94] transition-all";
       });
 
       document.getElementById('sec-' + seccionId).classList.remove('hidden');
       document.getElementById('sec-' + seccionId).classList.add('block');
       
       const actBtn = document.getElementById('nav-' + seccionId);
-      actBtn.classList.remove('text-gray-400');
-      actBtn.classList.add('text-[#7D5A94]');
+      // Aplicar color de relieve activo
+      actBtn.className = "flex flex-col items-center justify-center w-20 py-2 text-[#7D5A94] bg-purple-100/50 rounded-2xl font-extrabold transition-all";
 
       if (seccionId === 'carrito') {
         renderizarCarrito();
@@ -614,7 +516,7 @@
             categoriasLocal = response.categorias;
             construirSelectorCategorias();
             renderizarCatalogo();
-            iniciarCarruselBanner(); // Iniciar carrusel dinámico
+            iniciarCarruselBanner(); 
           } else {
             console.error("Error al obtener catálogo: " + response.error);
           }
@@ -632,33 +534,24 @@
     function iniciarCarruselBanner() {
       if (catalogoProductos.length === 0) return;
       
-      // Filtrar productos con imagen válida
       const productosConImágenes = catalogoProductos.filter(p => p.imagen1);
       if (productosConImágenes.length === 0) return;
 
       const imgEl = document.getElementById('carousel-img');
-      
-      // Mostrar la primera imagen de inmediato
       imgEl.src = productosConImágenes[0].imagen1;
-      imgEl.classList.add('fade-in');
 
       if (intervalCarousel) clearInterval(intervalCarousel);
 
       intervalCarousel = setInterval(() => {
-        // Efecto de desvanecimiento hacia la izquierda (Slide out left)
-        imgEl.classList.remove('fade-in');
         imgEl.classList.add('fade-out-left');
 
         setTimeout(() => {
           indexCarousel = (indexCarousel + 1) % productosConImágenes.length;
           imgEl.src = productosConImágenes[indexCarousel].imagen1;
-          
-          // Re-aplicar entrada suave
           imgEl.classList.remove('fade-out-left');
-          imgEl.classList.add('fade-in');
-        }, 800); // Sincronizado con la transición de CSS
+        }, 800); 
 
-      }, 3500);
+      }, 4000);
     }
 
     // ==================== RENDERIZACIÓN DE CATÁLOGO ====================
@@ -743,7 +636,7 @@
       });
     }
 
-    // ==================== VENTANA EMERGENTE DE DETALLES (NUEVO) ====================
+    // ==================== DETALLES DE PRODUCTO (CORREGIDO DESCRIPCIÓN) ====================
     function mostrarDetalleProducto(sku) {
       const prod = catalogoProductos.find(p => p.sku === sku);
       if (!prod) return;
@@ -751,12 +644,13 @@
       document.getElementById('det-nombre').textContent = prod.nombre;
       document.getElementById('det-sku-cat').textContent = `${prod.sku} | ${prod.categoria}`;
       document.getElementById('det-precio').textContent = `S/ ${parseFloat(prod.precioVenta).toFixed(2)}`;
-      document.getElementById('det-descripcion').textContent = prod.descripcion || "Sin descripción detallada por el momento.";
+      
+      // Mostrar descripción real proveniente del Excel
+      document.getElementById('det-descripcion').textContent = prod.descripcion || "Sin descripción por el momento.";
 
       const imgPrincipal = document.getElementById('det-img-principal');
       imgPrincipal.src = prod.imagen1 || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=250';
 
-      // Construcción dinámica de la galería de miniaturas
       const miniaturasContainer = document.getElementById('det-galeria-miniaturas');
       miniaturasContainer.innerHTML = "";
       
@@ -770,7 +664,6 @@
         });
       }
 
-      // Configurar acción del botón comprar del modal de detalles
       document.getElementById('det-btn-comprar').onclick = () => {
         solicitarAgregarAlCarrito(sku);
       };
@@ -836,7 +729,7 @@
       playChime();
       actualizarContadorCarrito();
       cerrarModalConfirmacion();
-      cerrarModalDetalle(); // Cerrar el modal de detalles si estaba abierto
+      cerrarModalDetalle(); 
       mostrarMensajeAlerta("¡Agregado con éxito a tu pedido! ✨");
     }
 
@@ -873,7 +766,7 @@
       totales.classList.remove('hidden');
       mascota.classList.remove('hidden');
 
-      // Selección de frase aleatoria de Mimi (Mascota)
+      // Seleccionar frase alentadora
       const fraseAzar = frasesMascota[Math.floor(Math.random() * frasesMascota.length)];
       document.getElementById('mascota-frase').textContent = fraseAzar;
 
@@ -928,11 +821,8 @@
       renderizarCarrito();
     }
 
-    // ==================== MODAL DE CHECKOUT (FORMULARIO MOVIDO) ====================
+    // ==================== CHECKOUT (SOLO SOLICITA DNI) ====================
     function abrirModalCheckout() {
-      tocarChimePestaña();
-      
-      // Auto-completar DNI de almacenamiento local si existe
       const dniGuardado = localStorage.getItem('mia_lookup_dni');
       if (dniGuardado) {
         document.getElementById('form-dni').value = dniGuardado;
@@ -949,30 +839,12 @@
       modal.classList.remove('opacity-100');
     }
 
-    function tocarChimePestaña() {
-      if (!soundEnabled) return;
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.value = 659.25;
-        gain.gain.setValueAtTime(0.02, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.15);
-      } catch(e){}
-    }
-
-    // ==================== ENVÍO DEL PEDIDO A APPS SCRIPT (CORS) ====================
+    // ==================== ENVÍO AUTOMÁTICO A APPS SCRIPT ====================
     function procesarConfirmacionPedido() {
       const dni = document.getElementById('form-dni').value.trim();
-      const nombre = document.getElementById('form-nombre').value.trim();
-      const depto = document.getElementById('form-departamento').value;
-      const notas = document.getElementById('form-notas').value.trim();
 
-      if (!dni || !nombre) {
-        alert("Por favor, introduce tu DNI y tu Nombre Completo para culminar el registro.");
+      if (!dni) {
+        alert("Por favor, introduce tu número de identidad para culminar.");
         return;
       }
 
@@ -984,16 +856,17 @@
         return { sku: item.sku, nombre: item.nombre, cantidad: item.cantidad };
       });
 
+      // El nombreCliente y departamento se asocian en el backend de forma automática mediante la BD de Excel
       const pedidoDTO = {
         dniCliente: dni,
-        nombreCliente: nombre,
-        departamento: depto,
+        nombreCliente: "", 
+        departamento: "", 
         detalleProductos: detalleProductos,
         categoriaPrincipal: carrito[0].categoria,
         precioCompra: totalCompra,
         precioVenta: totalVenta,
         metodoPago: "Contraentrega (Efectivo)",
-        aportes: notas ? `Nota de la clienta: ${notas}` : ""
+        aportes: "Pedido realizado desde el catálogo web."
       };
 
       localStorage.setItem('mia_lookup_dni', dni);
@@ -1022,16 +895,14 @@
     }
 
     function generarEnlaceWhatsApp(pedido) {
-      const numeroCelularAdmin = "51987654321"; // Reemplaza por tu celular real de MiaShop
+      const numeroCelularAdmin = "51987654321"; // Tu número real de MiaShop
       let listaTexto = "";
       pedido.detalleProductos.forEach(i => {
         listaTexto += `• ${i.nombre} (Cant: ${i.cantidad})\n`;
       });
       
       const mensaje = `✨ *MIA_SHOP - PEDIDO REGISTRADO* ✨\n\n` +
-                      `📋 *Cliente:* ${pedido.nombreCliente}\n` +
-                      `💳 *DNI/RUC:* ${pedido.dniCliente}\n` +
-                      `📍 *Destino:* ${pedido.departamento}\n\n` +
+                      `💳 *DNI/RUC:* ${pedido.dniCliente}\n\n` +
                       `📦 *Productos Seleccionados:*\n${listaTexto}\n` +
                       `💰 *Monto Estimado:* S/ ${pedido.precioVenta.toFixed(2)}\n\n` +
                       `⚙️ _Pedido registrado automáticamente en el catálogo virtual._`;
@@ -1040,7 +911,7 @@
       window.open(link, '_blank');
     }
 
-    // ==================== SEGUIMIENTO DE PEDIDOS (DNI LOOKUP) ====================
+    // ==================== SEGUIMIENTO DE PEDIDOS ====================
     function consultarPedidosDNI() {
       const dni = document.getElementById('input-dni-consulta').value.trim();
       if (!dni) {
@@ -1135,7 +1006,7 @@
         });
       }
 
-      // Renderizar Historial y Boletas Virtuales (Botón Ampliado)
+      // Renderizar Historial y Boletas Virtuales (Botonera más grande)
       if (completados.length === 0) {
         historialContainer.innerHTML = `<p class="text-xs text-gray-400 italic">Historial de boletas archivadas vacío.</p>`;
       } else {
@@ -1162,8 +1033,8 @@
                   <p class="text-[10px] text-gray-400">Total Cobrado</p>
                   <p class="font-extrabold text-[#7D5A94] text-lg">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
                 </div>
-                <!-- Botón de Boleta más Grande y Visible -->
-                <button onclick="abrirBoleta('${p.id}')" class="mt-2 bg-[#7D5A94] hover:bg-[#68497d] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all">
+                <!-- Botón de visualización ampliado y muy visible -->
+                <button onclick="abrirBoleta('${p.id}')" class="mt-2 w-full sm:w-auto bg-[#7D5A94] hover:bg-[#68497d] text-white px-5 py-3 rounded-xl font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-all">
                   <span>📄 VER MI BOLETA DE COMPRA</span>
                 </button>
               </div>
