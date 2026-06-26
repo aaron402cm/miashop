@@ -1363,16 +1363,34 @@
 
     // ==================== VISUALIZADOR DE BOLETAS VIRTUALES (CON POPUP DE ESPERA) ====================
     function abrirBoleta(idPedido) {
-      const loaderEspera = document.getElementById('modal-espera-boleta');
-      loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
-      loaderEspera.classList.add('opacity-100');
+  const loaderEspera = document.getElementById('modal-espera-boleta');
+  loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
+  loaderEspera.classList.add('opacity-100');
+
+  // Red de seguridad: si algo falla silenciosamente en Safari, cierra el loader a los 10s
+  const safetyTimer = setTimeout(() => {
+    loaderEspera.classList.add('opacity-0', 'pointer-events-none');
+    loaderEspera.classList.remove('opacity-100');
+  }, 10000);
 
       fetch(`${API_URL}?action=consultarPedidosDNI&dni=${localStorage.getItem('mia_lookup_dni')}`, { redirect: "follow" })
-        .then(res => res.json())
-        .then(response => {
+  .then(res => res.text())
+  .then(text => {
+    let data;
+    try { data = JSON.parse(text); } catch(e) {
+      loaderEspera.classList.add('opacity-0', 'pointer-events-none');
+      loaderEspera.classList.remove('opacity-100');
+      alert("Error al leer respuesta del servidor.");
+      return;
+    }
+    return data;
+  })
+  .then(response => {
+    if (!response) return;
           loaderEspera.classList.add('opacity-0', 'pointer-events-none');
           loaderEspera.classList.remove('opacity-100');
 
+          clearTimeout(safetyTimer);
           if (response.success) {
             const pedido = response.pedidos.find(p => p.id === idPedido);
             if (!pedido) return;
@@ -1397,11 +1415,13 @@
             modal.classList.add('opacity-100');
           }
         })
-        .catch(() => {
-          loaderEspera.classList.add('opacity-0', 'pointer-events-none');
-          loaderEspera.classList.remove('opacity-100');
-          alert("Error de conexión al generar boleta.");
-        });
+        .catch((err) => {
+    clearTimeout(safetyTimer);
+    console.error("Error boleta:", err);
+    loaderEspera.classList.add('opacity-0', 'pointer-events-none');
+    loaderEspera.classList.remove('opacity-100');
+    alert("Error de conexión al generar boleta. Intenta nuevamente.");
+  });
     }
 
     function cerrarModalBoleta() {
