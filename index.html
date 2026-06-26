@@ -282,8 +282,8 @@
       <div id="consulta-resultados" class="space-y-6 hidden">
         
         <!-- Saludo Personalizado para la Clienta -->
-        <div id="greeting-container" class="hidden text-center py-3 bg-purple-50/50 rounded-2xl border border-purple-100 max-w-sm mx-auto shadow-sm">
-          <p class="font-magic text-base font-bold text-[#7D5A94]" id="greeting-text"></p>
+        <div id="greeting-container" class="hidden text-center py-2">
+          <p id="greeting-text" class="text-base text-gray-600 font-medium"></p>
         </div>
 
         <!-- Panel Pedidos Activos -->
@@ -594,7 +594,7 @@
       "¡Esto te va a traer muchísima felicidad, te lo garantizo!",
       "¡Perfecto para engreírte hoy! Te lo mereces por completo.",
       "¡Qué gusto tan fino! Tus selecciones hablan de tu gran personalidad.",
-      "¡Una adquisición fantástica! Calidad duradera and hermosa.",
+      "¡Una adquisición fantástica! Calidad duradera y hermosa.",
       "¡Qué gran adquisición! Te aseguro que superará tus expectativas.",
       "¡Una compra de la que te sentirás muy orgullosa! Excelente.",
       "¡Precioso detalle! Este producto es pura distinción.",
@@ -1128,7 +1128,8 @@
       mascota.style.margin = '';
       mascota.style.padding = '';
 
-      const fraseAzar = frasesMascota[Math.floor(Math.random() * frasesMascota.length)];
+      const frasesMimi = frasesMascota;
+      const fraseAzar = frasesMimi[Math.floor(Math.random() * frasesMimi.length)];
       document.getElementById('mascota-frase').textContent = fraseAzar;
 
       if (window.mimiTimer) clearTimeout(window.mimiTimer);
@@ -1460,7 +1461,9 @@
           try {
             const items = JSON.parse(p.detalleProductos);
             items.forEach(i => {
-              listaHtml += `• ${i.nombre} <span class="text-purple-600 font-bold">(x${i.cantidad})</span><br>`;
+              // CAMBIO DE DISEÑO: Se formatea la cantidad como "unid." o "unids." para mayor claridad visual
+              const sufijo = parseInt(i.cantidad) === 1 ? "unid." : "unids.";
+              listaHtml += `• ${i.nombre} <span class="text-purple-600 font-semibold">(${i.cantidad} ${sufijo})</span><br>`;
             });
           } catch(e) { listaHtml = "Formato de producto no compatible"; }
 
@@ -1549,7 +1552,9 @@
           let itemsHtml = "";
           try {
             JSON.parse(p.detalleProductos).forEach(i => {
-              itemsHtml += `• ${i.nombre} <span class="text-purple-600 font-bold">(x${i.cantidad})</span><br>`;
+              // CAMBIO DE DISEÑO: Se formatea la cantidad como "unid." o "unids." para mayor claridad visual
+              const sufijo = parseInt(i.cantidad) === 1 ? "unid." : "unids.";
+              itemsHtml += `• ${i.nombre} <span class="text-purple-600 font-semibold">(${i.cantidad} ${sufijo})</span><br>`;
             });
           } catch(e) {}
 
@@ -1610,7 +1615,8 @@
         
         try {
           JSON.parse(pedido.detalleProductos).forEach(i => {
-            itemsContainer.innerHTML += `<div class="flex justify-between py-1 border-b border-purple-50/20"><span>${i.nombre}</span><span class="font-bold">x${i.cantidad}</span></div>`;
+            // CAMBIO DE DISEÑO: Se formatea la cantidad como "unid." o "unids." en la boleta virtual
+            itemsContainer.innerHTML += `<div class="flex justify-between py-1 border-b border-purple-50/20"><span>${i.nombre}</span><span class="font-semibold text-gray-500">${i.cantidad} ${parseInt(i.cantidad) === 1 ? 'unid.' : 'unids.'}</span></div>`;
           });
         } catch(e) {}
 
