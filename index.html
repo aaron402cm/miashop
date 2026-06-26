@@ -1399,6 +1399,14 @@
       modal.classList.add('opacity-0', 'pointer-events-none');
       modal.classList.remove('opacity-100');
     }
+    document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('btn-sonido').textContent = soundEnabled ? '🔊' : '🔇';
+  verificarModoNocturnoAutomatico();
+  actualizarContadorCarrito();
+  cambiarSeccion('catalogo');
+  cargarCatalogoServidor();   // ← Esta es la clave: carga las imágenes del catálogo
+  inicializarEfectoBanner();  // ← Y esta activa el carrusel del banner
+});
   </script>
 </body>
 </html>
