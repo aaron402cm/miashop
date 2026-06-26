@@ -1,3 +1,5 @@
+--- START OF FILE Paste June 26, 2026 - 11:45AM ---
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1219,7 +1221,9 @@
       const numeroCelularAdmin = "51983663828";
       const mensaje = "Hola me gustaria que me puedas registrar, quiero ser parte de la familia MiaShop";
       const link = `https://wa.me/${numeroCelularAdmin}?text=${encodeURIComponent(mensaje)}`;
-      window.open(link, '_blank');
+      
+      // CAMBIADO: window.location.href en lugar de window.open para evitar bloqueadores de ventanas emergentes en móviles
+      window.location.href = link;
     }
 
     // ==================== VERIFICACIÓN Y ENVÍO AUTOMÁTICO A APPS SCRIPT ====================
@@ -1237,11 +1241,9 @@
         return;
       }
 
-      // Deshabilitamos el botón temporalmente y damos feedback visual de espera
       btnConfirmar.disabled = true;
       btnConfirmar.textContent = "Verificando... 🔍";
 
-      // 1. Validamos en la base de datos de Sheets si la clienta existe
       fetch(`${API_URL}?action=verificarCliente&dni=${dni}`, { redirect: "follow" })
         .then(res => res.text())
         .then(text => {
@@ -1250,15 +1252,13 @@
             response = JSON.parse(text);
           } catch(e) {
             console.error("Error interpretando verificación:", e);
-            response = { success: false }; // Seguridad por fallo de parseo
+            response = { success: false }; 
           }
 
           if (response && response.success) {
-            // Clienta registrada encontrada: Procesar el pedido con su nombre de base de datos
             const nombreClienteValido = response.nombre || "Clienta Registrada";
             ejecutarRegistroDePedido(dni, nombreClienteValido);
           } else {
-            // Clienta no registrada: Mostrar el modal amable de WhatsApp
             cerrarModalCheckout();
             abrirModalNoRegistrado();
           }
@@ -1340,7 +1340,9 @@
                       `⚙️ _Pedido enviado automáticamente desde el catálogo virtual MiaShop._`;
 
       const link = `https://wa.me/${numeroCelularAdmin}?text=${encodeURIComponent(mensaje)}`;
-      window.open(link, '_blank');
+      
+      // CAMBIADO: window.location.href en lugar de window.open para evitar bloqueadores de ventanas emergentes en móviles
+      window.location.href = link;
     }
 
     // ==================== SEGUIMIENTO DE PEDIDOS Y CACHÉ LOCAL ====================
