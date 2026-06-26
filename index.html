@@ -1,3 +1,5 @@
+--- START OF FILE Paste June 26, 2026 - 11:45AM ---
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -268,18 +270,31 @@
         <p class="text-sm text-gray-400 mt-2">Buscando tus pedidos en el pergamino...</p>
       </div>
 
+      <!-- Selector de Pestañas (Tabs) de Pedidos (Separador inteligente para reducir carga cognitiva) -->
+      <div id="tabs-pedidos-container" class="hidden flex border-b border-purple-100 max-w-md mx-auto mt-4">
+        <button onclick="cambiarTabPedidos('activos')" id="tab-pedidos-activos" class="flex-1 py-3 text-center border-b-2 font-bold text-sm transition-all focus:outline-none border-[#7D5A94] text-[#7D5A94]">
+          ⏳ En Camino (<span id="count-activos">0</span>)
+        </button>
+        <button onclick="cambiarTabPedidos('historial')" id="tab-pedidos-historial" class="flex-1 py-3 text-center border-b-2 font-bold text-sm transition-all focus:outline-none border-transparent text-gray-400">
+          📜 Entregados (<span id="count-historial">0</span>)
+        </button>
+      </div>
+
       <!-- Lista de Pedidos Encontrados -->
-      <div id="consulta-resultados" class="space-y-8 hidden">
+      <div id="consulta-resultados" class="space-y-6 hidden">
         
-        <!-- Pedidos Activos -->
-        <div class="space-y-4">
-          <h3 class="font-magic text-xl font-bold text-[#7D5A94] border-b pb-2 flex items-center gap-2">⏳ Pedidos Activos</h3>
+        <!-- Saludo Personalizado para la Clienta -->
+        <div id="greeting-container" class="hidden text-center py-3 bg-purple-50/50 rounded-2xl border border-purple-100 max-w-sm mx-auto shadow-sm">
+          <p class="font-magic text-base font-bold text-[#7D5A94]" id="greeting-text"></p>
+        </div>
+
+        <!-- Panel Pedidos Activos -->
+        <div id="panel-pedidos-activos" class="space-y-4 block">
           <div id="lista-pedidos-activos" class="space-y-6"></div>
         </div>
 
-        <!-- Historial y Boletas -->
-        <div class="space-y-4">
-          <h3 class="font-magic text-xl font-bold text-emerald-800 border-b pb-2 flex items-center gap-2">📜 Historial y Boletas Archivadas</h3>
+        <!-- Panel Historial y Boletas -->
+        <div id="panel-pedidos-historial" class="space-y-4 hidden">
           <div id="lista-pedidos-historial" class="space-y-4"></div>
         </div>
       </div>
@@ -462,6 +477,7 @@
     let categoriasLocal = [];
     let carrito = [];
     let pedidosConsultados = []; // Memoria caché local para evitar peticiones redundantes e incompatibilidades en Safari/iPhone
+    let activeTabPedidos = 'activos'; // Control de la pestaña activa de seguimiento
     
     // FUNCIONES DE CONTROL DE SEGURIDAD PARA STORAGE EN NAVEGADORES PRIVADOS DE IOS
     function safeStorageSet(key, value) {
@@ -580,7 +596,7 @@
       "¡Esto te va a traer muchísima felicidad, te lo garantizo!",
       "¡Perfecto para engreírte hoy! Te lo mereces por completo.",
       "¡Qué gusto tan fino! Tus selecciones hablan de tu gran personalidad.",
-      "¡Una adquisición fantástica! Calidad duradera y hermosa.",
+      "¡Una adquisición fantástica! Calidad duradera and hermosa.",
       "¡Qué gran adquisición! Te aseguro que superará tus expectativas.",
       "¡Una compra de la que te sentirás muy orgullosa! Excelente.",
       "¡Precioso detalle! Este producto es pura distinción.",
@@ -1206,6 +1222,33 @@
       }
     }
 
+    // ==================== SELECCIÓN DE PESTAÑAS (TABS) EN SEGUIMIENTO ====================
+    function cambiarTabPedidos(tabId) {
+      playNavTap();
+      activeTabPedidos = tabId;
+
+      const tabActivos = document.getElementById('tab-pedidos-activos');
+      const tabHistorial = document.getElementById('tab-pedidos-historial');
+      const panelActivos = document.getElementById('panel-pedidos-activos');
+      const panelHistorial = document.getElementById('panel-pedidos-historial');
+
+      if (tabId === 'activos') {
+        tabActivos.className = "flex-1 py-3 text-center border-b-2 font-bold text-sm transition-all focus:outline-none border-[#7D5A94] text-[#7D5A94]";
+        tabHistorial.className = "flex-1 py-3 text-center border-b-2 font-bold text-sm transition-all focus:outline-none border-transparent text-gray-400";
+        panelActivos.classList.remove('hidden');
+        panelActivos.classList.add('block');
+        panelHistorial.classList.remove('block');
+        panelHistorial.classList.add('hidden');
+      } else {
+        tabActivos.className = "flex-1 py-3 text-center border-b-2 font-bold text-sm transition-all focus:outline-none border-transparent text-gray-400";
+        tabHistorial.className = "flex-1 py-3 text-center border-b-2 font-bold text-sm transition-all focus:outline-none border-emerald-600 text-emerald-800";
+        panelActivos.classList.remove('block');
+        panelActivos.classList.add('hidden');
+        panelHistorial.classList.remove('hidden');
+        panelHistorial.classList.add('block');
+      }
+    }
+
     function cerrarModalNoRegistrado() {
       const modal = document.getElementById('modal-no-registrado');
       if (modal) {
@@ -1354,6 +1397,7 @@
       document.getElementById('consulta-loader').classList.remove('hidden');
       document.getElementById('consulta-resultados').classList.add('hidden');
       document.getElementById('consulta-vacio').classList.add('hidden');
+      document.getElementById('tabs-pedidos-container').classList.add('hidden');
 
       fetch(`${API_URL}?action=consultarPedidosDNI&dni=${dni}`, { redirect: "follow" })
         .then(res => res.json())
@@ -1374,6 +1418,8 @@
     function renderizarPedidosConsulta(pedidos) {
       const activosContainer = document.getElementById('lista-pedidos-activos');
       const historialContainer = document.getElementById('lista-pedidos-historial');
+      const greetingContainer = document.getElementById('greeting-container');
+      const greetingText = document.getElementById('greeting-text');
       
       activosContainer.innerHTML = "";
       historialContainer.innerHTML = "";
@@ -1381,16 +1427,35 @@
       const activos = pedidos.filter(p => p.estadoEnvio !== "Entregado");
       const completados = pedidos.filter(p => p.estadoEnvio === "Entregado");
 
+      // Actualizar contadores numéricos en las pestañas
+      document.getElementById('count-activos').textContent = activos.length;
+      document.getElementById('count-historial').textContent = completados.length;
+
       if (pedidos.length === 0) {
         document.getElementById('consulta-vacio').classList.remove('hidden');
+        greetingContainer.classList.add('hidden');
+        document.getElementById('tabs-pedidos-container').classList.add('hidden');
         return;
       }
 
+      // Habilitar pestañas y saludo personalizado
+      document.getElementById('tabs-pedidos-container').classList.remove('hidden');
       document.getElementById('consulta-resultados').classList.remove('hidden');
+
+      // Sanitizar saludo de clienta
+      if (pedidos.length > 0) {
+        const rawNombre = pedidos[0].nombreCliente || "Clienta";
+        const nombreLimpio = rawNombre.includes("(No registrada)") ? "Clienta" : rawNombre;
+        greetingText.innerHTML = `👋 ¡Un gusto verte de nuevo, <span class="font-extrabold text-[#7D5A94]">${nombreLimpio}</span>! ✨`;
+        greetingContainer.classList.remove('hidden');
+      }
+
+      // Mantener por defecto la pestaña de activos al consultar
+      cambiarTabPedidos('activos');
 
       // Renderizar Pedidos Activos
       if (activos.length === 0) {
-        activosContainer.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-4">No tienes pedidos en progreso de despacho.</p>`;
+        activosContainer.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-8 bg-white rounded-3xl border border-purple-50 shadow-sm">No tienes pedidos en progreso de despacho.</p>`;
       } else {
         activos.forEach(p => {
           let listaHtml = "";
@@ -1404,33 +1469,72 @@
           const fases = ['Pendiente', 'En Proceso', 'Enviado'];
           const faseIndex = fases.indexOf(p.estadoEnvio);
           
-          let timelineHtml = `<div class="flex items-center justify-between mt-4">`;
+          // Mapear el estado a etiqueta textual clara para el usuario mayor
+          const fNombre = p.estadoEnvio === 'Pendiente' ? 'Compra ⌛' : p.estadoEnvio === 'En Proceso' ? 'Empaque 📦' : 'En Ruta 🚚';
+          let textoEstadoActual = `Estado actual: <span class="font-extrabold text-[#7D5A94]">${fNombre}</span>`;
+
+          // Generación de la línea de tiempo conectada (con resaltado único de la fase activa)
+          let timelineHtml = `
+            <div class="space-y-3 pt-2">
+              <p class="text-xs font-semibold text-gray-500 bg-purple-50/60 py-1.5 px-3 rounded-lg border border-purple-100/50 inline-block">
+                📍 ${textoEstadoActual}
+              </p>
+              
+              <div class="relative flex items-center justify-between mt-6 px-4">
+                <!-- Línea conectora base -->
+                <div class="absolute left-6 right-6 top-4 h-1 bg-gray-200 z-0"></div>
+                <!-- Línea de progreso de color -->
+                <div class="absolute left-6 top-4 h-1 bg-[#7D5A94] z-0 transition-all duration-500" style="width: ${faseIndex === 0 ? '0%' : faseIndex === 1 ? '50%' : '100%'}"></div>
+          `;
+
           fases.forEach((f, i) => {
             const pasoCompletado = i <= faseIndex;
-            const circuloColor = pasoCompletado ? 'bg-[#7D5A94] text-white' : 'bg-gray-100 text-gray-400';
-            const etiquetaColor = pasoCompletado ? 'text-[#7D5A94] font-bold' : 'text-gray-400';
-            
+            const esPasoActual = i === faseIndex; // Destacar SOLAMENTE el paso actual
+
+            let circuloClase = "";
+            let pulsoHtml = "";
+
+            if (esPasoActual) {
+              // Animación de pulso, tamaño mayor y borde con anillo para el paso activo
+              circuloClase = "bg-[#7D5A94] text-white w-10 h-10 ring-4 ring-purple-200 scale-110 font-bold z-10 shadow-md transform transition-all";
+              pulsoHtml = `<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F2846B] opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-[#F2846B]"></span></span>`;
+            } else if (pasoCompletado) {
+              // Pasos completados anteriores
+              circuloClase = "bg-[#7D5A94] text-white w-8 h-8 z-10 font-semibold shadow-sm";
+            } else {
+              // Pasos futuros no alcanzados
+              circuloClase = "bg-gray-100 text-gray-400 w-8 h-8 z-10 font-medium border border-gray-200";
+            }
+
+            const etiquetaColor = esPasoActual ? 'text-[#7D5A94] font-extrabold text-xs' : (pasoCompletado ? 'text-purple-400 font-medium text-xs' : 'text-gray-400 text-xs');
+            const etiquetaTexto = f === 'Pendiente' ? 'Compra ⌛' : f === 'En Proceso' ? 'Empaque 📦' : 'En Ruta 🚚';
+
             timelineHtml += `
-              <div class="flex flex-col items-center">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${circuloColor}">
+              <div class="flex flex-col items-center relative">
+                <div class="rounded-full flex items-center justify-center text-xs relative transition-all duration-300 ${circuloClase}">
+                  ${pulsoHtml}
                   ${i + 1}
                 </div>
-                <span class="text-xs mt-1 ${etiquetaColor}">${f === 'Pendiente' ? 'Compra ⌛' : f === 'En Proceso' ? 'Empaque 📦' : 'En Ruta 🚚'}</span>
+                <span class="mt-2 text-center whitespace-nowrap ${etiquetaColor}">${etiquetaTexto}</span>
               </div>
             `;
           });
-          timelineHtml += `</div>`;
+
+          timelineHtml += `
+              </div>
+            </div>
+          `;
 
           const card = `
             <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3">
               <div class="flex justify-between items-center border-b pb-2 text-sm">
-                <span class="font-bold text-[#7D5A94]">ID: ${p.id}</span>
+                <span class="font-bold text-[#7D5A94]">N° de Pedido: ${p.id.replace("PED-", "")}</span>
                 <span class="text-gray-400 font-medium">${p.fecha.substring(0,10)}</span>
               </div>
               <div class="text-base font-medium leading-relaxed">${listaHtml}</div>
               <div class="flex justify-between items-center text-base pt-2 border-t">
-                <span class="text-xs text-gray-400">Total Pedido:</span>
-                <span class="font-bold text-[#F2846B]">S/ ${parseFloat(p.precioVenta).toFixed(2)}</span>
+                <span class="text-xs text-gray-400 font-semibold uppercase">Total a pagar:</span>
+                <span class="font-extrabold text-[#F2846B]">S/ ${parseFloat(p.precioVenta).toFixed(2)}</span>
               </div>
               ${timelineHtml}
             </div>
@@ -1441,7 +1545,7 @@
 
       // Renderizar Historial y Boletas
       if (completados.length === 0) {
-        historialContainer.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-4">No tienes boletas archivadas.</p>`;
+        historialContainer.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-8 bg-white rounded-3xl border border-purple-50 shadow-sm">No tienes boletas archivadas.</p>`;
       } else {
         completados.forEach(p => {
           let itemsHtml = "";
@@ -1456,7 +1560,7 @@
               <div class="flex justify-between items-center border-b border-emerald-100/50 pb-2">
                 <div class="flex items-center gap-1.5 font-bold text-emerald-800 text-sm">
                   <span>✅ Entregado</span>
-                  <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">${p.id}</span>
+                  <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">ID: ${p.id}</span>
                 </div>
                 <span class="text-[10px] text-gray-400 font-medium">${p.fecha.substring(0, 10)}</span>
               </div>
@@ -1531,6 +1635,13 @@
       cambiarSeccion('catalogo');
       cargarCatalogoServidor();
       inicializarEfectoBanner();
+
+      // Autocompleta el DNI si ya hay una compra registrada en el celular para mejorar la accesibilidad
+      const dniGuardado = safeStorageGet('mia_lookup_dni');
+      if (dniGuardado) {
+        const inputConsulta = document.getElementById('input-dni-consulta');
+        if (inputConsulta) inputConsulta.value = dniGuardado;
+      }
     });
   </script>
 </body>
