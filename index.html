@@ -1366,5 +1366,25 @@
       modal.classList.remove('opacity-100');
     }
   </script>
+  // ==================== INICIALIZACIÓN DE LA APP ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Modo nocturno automático o manual guardado
+  verificarModoNocturnoAutomatico();
+
+  // 2. Actualizar contador del carrito desde localStorage
+  actualizarContadorCarrito();
+
+  // 3. Activar sección inicial y resaltar nav
+  cambiarSeccion('catalogo');
+
+  // 4. Iniciar efecto del banner
+  inicializarEfectoBanner();
+
+  // 5. ⭐ CARGAR PRODUCTOS (esto era lo que faltaba)
+  cargarCatalogoServidor();
+
+  // 6. Ícono de sonido según preferencia guardada
+  document.getElementById('btn-sonido').textContent = soundEnabled ? '🔊' : '🔇';
+});
 </body>
 </html>
