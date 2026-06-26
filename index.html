@@ -103,8 +103,10 @@
       background-color: rgba(30, 10, 60, 0.4) !important;
     }
      body.dark-mode main {
-       background: transparent !important;
-    }
+  background: transparent !important;
+  z-index: auto !important;
+  position: static !important;
+}
     /* Estrellas animadas */
     @keyframes twinkle {
       0%, 100% { opacity: 0.2; transform: scale(0.8); }
@@ -118,7 +120,7 @@
 <body class="pb-24 text-gray-800">
 
   <!-- Contenedor de Estrellas para el Modo Nocturno -->
-  <div id="night-stars-container" class="fixed inset-0 pointer-events-none overflow-hidden hidden" style="z-index: 1;"></div>
+  <div id="night-stars-container" class="fixed inset-0 pointer-events-none overflow-hidden hidden" style="z-index: 35;"></div>
 
   <!-- ==================== HEADER (SOL/LUNA CONTROL DE MODO - CARRITO COMPACTO) ==================== -->
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
@@ -618,7 +620,7 @@
       for (let i = 0; i < 80; i++) {
         const estrella = document.createElement('div');
          estrella.className = 'twinkle-star absolute bg-white rounded-full';
-         estrella.style.opacity = (Math.random() * 0.5 + 0.4).toString();
+         estrella.style.opacity = (Math.random() * 0.3 + 0.15).toString();
         const size = Math.random() * 3 + 1.5;
         estrella.style.width = size + 'px';
         estrella.style.height = size + 'px';
