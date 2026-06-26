@@ -102,11 +102,11 @@
     body.dark-mode .bg-purple-50\/40, body.dark-mode .bg-purple-50\/50 {
       background-color: rgba(30, 10, 60, 0.4) !important;
     }
-     body.dark-mode main {
-  background: transparent !important;
-  z-index: auto !important;
-  position: static !important;
-}
+    body.dark-mode main {
+      background: transparent !important;
+      z-index: auto !important;
+      position: static !important;
+    }
     /* Estrellas animadas */
     @keyframes twinkle {
       0%, 100% { opacity: 0.2; transform: scale(0.8); }
@@ -151,7 +151,7 @@
     <!-- PANTALLA: CATÁLOGO -->
     <section id="sec-catalogo" class="space-y-6 block">
       
-      <!-- Banner de Bienvenida inteligente (Inicia con Texto, luego cambia a Diapositiva) -->
+      <!-- Banner de Bienvenida inteligente -->
       <div id="banner-principal" class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md flex items-center justify-center min-h-[140px] relative overflow-hidden transition-all duration-700">
         
         <!-- Vista Inicial: Texto "Importaciones Mágicas" -->
@@ -436,39 +436,66 @@
 
   <!-- ==================== CÓDIGO JS INTEGRAL ==================== -->
   <script>
-    // =========================================================================
-    // ⚠️ ¡¡¡ ATENCIÓN !!! REEMPLAZA ESTE ENLACE CON TU URL REAL DE APPS SCRIPT
-    // debe terminar en /exec y debes haberlo publicado como "Cualquiera" (Anyone)
-    // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbyGMVq7Ricbcjy5Hcnwg2frnOr9MbsSelytAdI_YWEF4HAorDJfy_ZA5_BRGvdMO-ik/exec";
 
     // Variables de Estado de la Aplicación
     let catalogoProductos = [];
     let categoriasLocal = [];
     let carrito = [];
+    let pedidosConsultados = []; // Memoria caché local para evitar peticiones redundantes e incompatibilidades en Safari/iPhone
     
-    // VALIDACIÓN DE SEGURIDAD ABSOLUTA AL CARGAR MEMORIA (Evita bloqueos)
+    // FUNCIONES DE CONTROL DE SEGURIDAD PARA STORAGE EN NAVEGADORES PRIVADOS DE IOS
+    function safeStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (e) {
+        console.warn("Storage item write blocked:", e);
+      }
+    }
+
+    function safeStorageGet(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        console.warn("Storage item read blocked:", e);
+        return null;
+      }
+    }
+
+    function safeStorageRemove(key) {
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        console.warn("Storage item remove blocked:", e);
+      }
+    }
+
+    // VALIDACIÓN DE SEGURIDAD ABSOLUTA AL CARGAR MEMORIA
     try {
-      const rawCart = localStorage.getItem('mia_catalog_cart');
+      const rawCart = safeStorageGet('mia_catalog_cart');
       const parsed = JSON.parse(rawCart);
       if (Array.isArray(parsed)) {
         carrito = parsed;
       }
     } catch(e) {
       carrito = [];
-      localStorage.setItem('mia_catalog_cart', JSON.stringify([]));
+      safeStorageSet('mia_catalog_cart', JSON.stringify([]));
     }
     
-    let soundEnabled = localStorage.getItem('mia_sound_enabled') !== '0';
+    let soundEnabled = true;
+    try {
+      soundEnabled = safeStorageGet('mia_sound_enabled') !== '0';
+    } catch(e) {}
+
     let categoriaSeleccionada = 'Todas';
     let productoPorAgregar = null;
     let indexCarousel = 0;
     let intervalCarousel = null;
     let mimiTimer = null; 
     let audioCtxShared = null; 
-    let modoNocturnoManual = localStorage.getItem('mia_modo_nocturno_manual'); 
+    let modoNocturnoManual = safeStorageGet('mia_modo_nocturno_manual'); 
 
-    // 100 Frases de Refuerzo Positivo para la Mascota MIMI
+    // Frases de Refuerzo Positivo para la Mascota MIMI
     const frasesMascota = [
       "¡Qué excelente elección! Es uno de nuestros favoritos.",
       "¡Tienes un gusto increíble! Este pedido te va a encantar.",
@@ -578,7 +605,6 @@
         aplicarModoNocturno(modoNocturnoManual === 'night');
         return;
       }
-
       const hora = new Date().getHours();
       const esNocturno = (hora >= 19 || hora < 6);
       aplicarModoNocturno(esNocturno);
@@ -608,7 +634,7 @@
       const nuevoModo = !esNocturnoActual;
       
       modoNocturnoManual = nuevoModo ? 'night' : 'day';
-      localStorage.setItem('mia_modo_nocturno_manual', modoNocturnoManual);
+      safeStorageSet('mia_modo_nocturno_manual', modoNocturnoManual);
       
       aplicarModoNocturno(nuevoModo);
     }
@@ -619,8 +645,8 @@
       container.innerHTML = "";
       for (let i = 0; i < 80; i++) {
         const estrella = document.createElement('div');
-         estrella.className = 'twinkle-star absolute bg-white rounded-full';
-         estrella.style.opacity = (Math.random() * 0.3 + 0.15).toString();
+        estrella.className = 'twinkle-star absolute bg-white rounded-full';
+        estrella.style.opacity = (Math.random() * 0.3 + 0.15).toString();
         const size = Math.random() * 3 + 1.5;
         estrella.style.width = size + 'px';
         estrella.style.height = size + 'px';
@@ -654,16 +680,33 @@
       }, 2500);
     }
 
-    // ==================== MOTOR DE AUDIO COMPARTIDO ====================
+    // ==================== MOTOR DE AUDIO COMPARTIDO COMPATIBLE CON IOS ====================
     function getAudioContextShared() {
       if (!audioCtxShared) {
         audioCtxShared = new (window.AudioContext || window.webkitAudioContext)();
       }
-      if (audioCtxShared.state === 'suspended') {
+      if (audioCtxShared && audioCtxShared.state === 'suspended') {
         audioCtxShared.resume();
       }
       return audioCtxShared;
     }
+
+    // Desbloqueador global de Audio para iOS (Se dispara con el primer click del usuario)
+    function desbloquearAudioIOS() {
+      try {
+        const ctx = getAudioContextShared();
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            window.removeEventListener('click', desbloquearAudioIOS);
+            window.removeEventListener('touchstart', desbloquearAudioIOS);
+          });
+        }
+      } catch (e) {
+        console.warn("No se pudo desbloquear el contexto de audio en iOS:", e);
+      }
+    }
+    window.addEventListener('click', desbloquearAudioIOS, { passive: true });
+    window.addEventListener('touchstart', desbloquearAudioIOS, { passive: true });
 
     function playChime() {
       if (!soundEnabled) return;
@@ -712,9 +755,15 @@
 
     function toggleSonido() {
       soundEnabled = !soundEnabled;
-      localStorage.setItem('mia_sound_enabled', soundEnabled ? '1' : '0');
+      safeStorageSet('mia_sound_enabled', soundEnabled ? '1' : '0');
       document.getElementById('btn-sonido').textContent = soundEnabled ? '🔊' : '🔇';
-      if (soundEnabled) playChime();
+      if (soundEnabled) {
+        const ctx = getAudioContextShared();
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        playChime();
+      }
     }
 
     // ==================== CAMBIO DE PANTALLAS (TRANSICIONES OPTIMIZADAS A 150ms) ====================
@@ -743,13 +792,12 @@
 
     // ==================== LECTURA DE RED CLÁSICA COMPATIBLE BLINDADA ====================
     function cargarCatalogoServidor() {
-      // Iniciar loader visible
       document.getElementById('catalogo-cargando').classList.remove('hidden');
       document.getElementById('catalogo-grid').classList.add('hidden');
 
       fetch(API_URL + "?action=obtenerCatalogo", { redirect: "follow" })
         .then(res => {
-          return res.text(); // Leer como texto primero para evitar fallos de parseo
+          return res.text();
         })
         .then(text => {
           let response;
@@ -773,10 +821,9 @@
         })
         .catch(err => {
           console.error("Fallo de conexión de red:", err);
-          alert("Aviso de Conexión:\nNo se puede conectar con tu servidor de Google Sheets.\n\nVerifica que colocaste tu propia URL real en el código en GitHub (línea 639).");
+          alert("Aviso de Conexión:\nNo se puede conectar con tu servidor de Google Sheets.\n\nVerifica que colocaste tu propia URL real en el código.");
         })
         .finally(() => {
-          // Desactivar el cargador en cualquier escenario
           document.getElementById('catalogo-cargando').classList.add('hidden');
           document.getElementById('catalogo-grid').classList.remove('hidden');
         });
@@ -855,8 +902,6 @@
         const img = prod.imagen1 || 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=250';
         
         let etiquetaHtml = "";
-        
-        // Validación de SKU
         const skuStr = prod.sku ? String(prod.sku) : "";
         const idNum = parseInt(skuStr.replace("MIA-", "")) || 0;
         
@@ -994,7 +1039,7 @@
         });
       }
       
-      localStorage.setItem('mia_catalog_cart', JSON.stringify(carrito));
+      safeStorageSet('mia_catalog_cart', JSON.stringify(carrito));
       
       playChime();
       actualizarContadorCarrito();
@@ -1076,10 +1121,9 @@
         subtotal += itemTotal;
 
         const row = `
-          <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4 animate-fadeIn">
+          <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4">
             <div class="flex-1">
               <span class="text-xs font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
-              <!-- Clic en el nombre abre la galería de fotos -->
               <h4 onclick="mostrarDetalleProducto('${item.sku}', true)" class="font-magic text-lg font-bold text-[#7D5D99] hover:underline cursor-pointer leading-snug">${item.nombre}</h4>
               <p class="text-base font-extrabold text-[#F2846B] mt-0.5">S/ ${precio.toFixed(2)} c/u</p>
             </div>
@@ -1108,7 +1152,7 @@
       if (carrito[index].cantidad <= 0) {
         carrito.splice(index, 1);
       }
-      localStorage.setItem('mia_catalog_cart', JSON.stringify(carrito));
+      safeStorageSet('mia_catalog_cart', JSON.stringify(carrito));
       actualizarContadorCarrito();
       renderizarCarrito();
     }
@@ -1116,14 +1160,14 @@
     function vaciarCarrito() {
       if (!confirm("¿Deseas quitar todos los productos de tu pedido?")) return;
       carrito = [];
-      localStorage.removeItem('mia_catalog_cart');
+      safeStorageRemove('mia_catalog_cart');
       actualizarContadorCarrito();
       renderizarCarrito();
     }
 
     // ==================== CHECKOUT SIMPLIFICADO ====================
     function abrirModalCheckout() {
-      const dniGuardado = localStorage.getItem('mia_lookup_dni');
+      const dniGuardado = safeStorageGet('mia_lookup_dni');
       if (dniGuardado) {
         document.getElementById('form-dni').value = dniGuardado;
       }
@@ -1175,7 +1219,7 @@
         aportes: "Pedido realizado desde el catálogo web."
       };
 
-      localStorage.setItem('mia_lookup_dni', dni);
+      safeStorageSet('mia_lookup_dni', dni);
       cerrarModalCheckout();
       mostrarMensajeAlerta("Invocando pedido en el sistema principal... 🪄");
 
@@ -1187,7 +1231,7 @@
             generarEnlaceWhatsApp(pedidoDTO);
             
             carrito = [];
-            localStorage.removeItem('mia_catalog_cart');
+            safeStorageRemove('mia_catalog_cart');
             actualizarContadorCarrito();
             
             document.getElementById('input-dni-consulta').value = dni;
@@ -1204,7 +1248,7 @@
 
     // ==================== FORMATO DE WHATSAPP AMIGABLE Y ORDENADO ====================
     function generarEnlaceWhatsApp(pedido) {
-      const numeroCelularAdmin = "51983663828"; // Tu número real de MiaShop
+      const numeroCelularAdmin = "51983663828";
       let listaTexto = "";
       pedido.detalleProductos.forEach(i => {
         listaTexto += `• *${i.nombre}* (Cant: ${i.cantidad})\n`;
@@ -1222,7 +1266,7 @@
       window.open(link, '_blank');
     }
 
-    // ==================== SEGUIMIENTO DE PEDIDOS ====================
+    // ==================== SEGUIMIENTO DE PEDIDOS Y CACHÉ LOCAL ====================
     function consultarPedidosDNI() {
       const dni = document.getElementById('input-dni-consulta').value.trim();
       if (!dni) {
@@ -1238,6 +1282,8 @@
         .then(res => res.json())
         .then(response => {
           if (response.success) {
+            // Guardamos localmente la consulta para abrir las boletas al instante sin re-consultar la red
+            pedidosConsultados = response.pedidos || [];
             renderizarPedidosConsulta(response.pedidos);
           } else {
             console.error("Fallo del servidor: ", response.error);
@@ -1300,7 +1346,7 @@
           timelineHtml += `</div>`;
 
           const card = `
-            <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3 animate-fadeIn">
+            <div class="bg-white p-5 rounded-2xl border border-purple-100 shadow-sm space-y-3">
               <div class="flex justify-between items-center border-b pb-2 text-sm">
                 <span class="font-bold text-[#7D5A94]">ID: ${p.id}</span>
                 <span class="text-gray-400 font-medium">${p.fecha.substring(0,10)}</span>
@@ -1330,7 +1376,7 @@
           } catch(e) {}
 
           const row = `
-            <div class="bg-emerald-50/20 p-5 rounded-3xl border border-emerald-100 flex flex-col space-y-4 shadow-sm animate-fadeIn">
+            <div class="bg-emerald-50/20 p-5 rounded-3xl border border-emerald-100 flex flex-col space-y-4 shadow-sm">
               <div class="flex justify-between items-center border-b border-emerald-100/50 pb-2">
                 <div class="flex items-center gap-1.5 font-bold text-emerald-800 text-sm">
                   <span>✅ Entregado</span>
@@ -1343,13 +1389,11 @@
                 ${itemsHtml}
               </div>
 
-              <!-- Footer ordenado con espaciado proporcional -->
               <div class="flex items-center justify-between pt-3 border-t border-emerald-100/50 gap-4">
                 <div>
                   <p class="text-[10px] text-gray-400 uppercase font-semibold">Total Cobrado</p>
                   <p class="font-extrabold text-[#7D5A94] text-lg">S/ ${parseFloat(p.precioVenta).toFixed(2)}</p>
                 </div>
-                <!-- Botón de boleta proporcional y centrado -->
                 <button onclick="abrirBoleta('${p.id}')" class="bg-[#7D5A94] hover:bg-[#68497d] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all flex-shrink-0">
                   📄 Ver Boleta
                 </button>
@@ -1361,67 +1405,43 @@
       }
     }
 
-    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES (CON POPUP DE ESPERA) ====================
+    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES (OPT-IN PARA IOS) ====================
     function abrirBoleta(idPedido) {
-  const loaderEspera = document.getElementById('modal-espera-boleta');
-  loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
-  loaderEspera.classList.add('opacity-100');
+      const loaderEspera = document.getElementById('modal-espera-boleta');
+      loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
+      loaderEspera.classList.add('opacity-100');
 
-  // Red de seguridad: si algo falla silenciosamente en Safari, cierra el loader a los 10s
-  const safetyTimer = setTimeout(() => {
-    loaderEspera.classList.add('opacity-0', 'pointer-events-none');
-    loaderEspera.classList.remove('opacity-100');
-  }, 10000);
+      // Se usa la caché local de pedidos ya descargados para evitar solicitudes de red adicionales.
+      // Esto resuelve el bloqueo silencioso de redirecciones CORS en Safari para iPhone.
+      setTimeout(() => {
+        loaderEspera.classList.add('opacity-0', 'pointer-events-none');
+        loaderEspera.classList.remove('opacity-100');
 
-      fetch(`${API_URL}?action=consultarPedidosDNI&dni=${localStorage.getItem('mia_lookup_dni')}`, { redirect: "follow" })
-  .then(res => res.text())
-  .then(text => {
-    let data;
-    try { data = JSON.parse(text); } catch(e) {
-      loaderEspera.classList.add('opacity-0', 'pointer-events-none');
-      loaderEspera.classList.remove('opacity-100');
-      alert("Error al leer respuesta del servidor.");
-      return;
-    }
-    return data;
-  })
-  .then(response => {
-    if (!response) return;
-          loaderEspera.classList.add('opacity-0', 'pointer-events-none');
-          loaderEspera.classList.remove('opacity-100');
+        const pedido = pedidosConsultados.find(p => p.id === idPedido);
+        if (!pedido) {
+          alert("No se pudo cargar la boleta. Por favor, realiza la consulta de tu DNI nuevamente.");
+          return;
+        }
 
-          clearTimeout(safetyTimer);
-          if (response.success) {
-            const pedido = response.pedidos.find(p => p.id === idPedido);
-            if (!pedido) return;
+        document.getElementById('bol-id').textContent = pedido.id;
+        document.getElementById('bol-fecha').textContent = pedido.fecha.substring(0, 10);
+        document.getElementById('bol-dni').textContent = pedido.dniCliente;
+        document.getElementById('bol-nombre').textContent = pedido.nombreCliente;
+        document.getElementById('bol-total').textContent = `S/ ${parseFloat(pedido.precioVenta).toFixed(2)}`;
 
-            document.getElementById('bol-id').textContent = pedido.id;
-            document.getElementById('bol-fecha').textContent = pedido.fecha.substring(0, 10);
-            document.getElementById('bol-dni').textContent = pedido.dniCliente;
-            document.getElementById('bol-nombre').textContent = pedido.nombreCliente;
-            document.getElementById('bol-total').textContent = `S/ ${parseFloat(pedido.precioVenta).toFixed(2)}`;
+        const itemsContainer = document.getElementById('bol-items');
+        itemsContainer.innerHTML = "";
+        
+        try {
+          JSON.parse(pedido.detalleProductos).forEach(i => {
+            itemsContainer.innerHTML += `<div class="flex justify-between py-1 border-b border-purple-50/20"><span>${i.nombre}</span><span class="font-bold">x${i.cantidad}</span></div>`;
+          });
+        } catch(e) {}
 
-            const itemsContainer = document.getElementById('bol-items');
-            itemsContainer.innerHTML = "";
-            
-            try {
-              JSON.parse(pedido.detalleProductos).forEach(i => {
-                itemsContainer.innerHTML += `<div class="flex justify-between py-1 border-b border-purple-50/20"><span>${i.nombre}</span><span class="font-bold">x${i.cantidad}</span></div>`;
-              });
-            } catch(e) {}
-
-            const modal = document.getElementById('modal-boleta');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            modal.classList.add('opacity-100');
-          }
-        })
-        .catch((err) => {
-    clearTimeout(safetyTimer);
-    console.error("Error boleta:", err);
-    loaderEspera.classList.add('opacity-0', 'pointer-events-none');
-    loaderEspera.classList.remove('opacity-100');
-    alert("Error de conexión al generar boleta. Intenta nuevamente.");
-  });
+        const modal = document.getElementById('modal-boleta');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+      }, 600); // Pequeña demora para dar feedback visual antes de renderizar
     }
 
     function cerrarModalBoleta() {
@@ -1429,14 +1449,15 @@
       modal.classList.add('opacity-0', 'pointer-events-none');
       modal.classList.remove('opacity-100');
     }
+
     document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('btn-sonido').textContent = soundEnabled ? '🔊' : '🔇';
-  verificarModoNocturnoAutomatico();
-  actualizarContadorCarrito();
-  cambiarSeccion('catalogo');
-  cargarCatalogoServidor();   // ← Esta es la clave: carga las imágenes del catálogo
-  inicializarEfectoBanner();  // ← Y esta activa el carrusel del banner
-});
+      document.getElementById('btn-sonido').textContent = soundEnabled ? '🔊' : '🔇';
+      verificarModoNocturnoAutomatico();
+      actualizarContadorCarrito();
+      cambiarSeccion('catalogo');
+      cargarCatalogoServidor();
+      inicializarEfectoBanner();
+    });
   </script>
 </body>
 </html>
