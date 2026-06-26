@@ -1,3 +1,5 @@
+--- START OF FILE Paste June 26, 2026 - 11:45AM ---
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -368,7 +370,7 @@
 
       <div class="flex gap-2 pt-3">
         <button onclick="cerrarModalCheckout()" class="flex-1 py-3.5 border border-purple-200 text-gray-500 rounded-xl font-semibold text-base hover:bg-gray-50">Atrás</button>
-        <button onclick="procesarConfirmacionPedido()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-base hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
+        <button id="btn-procesar-checkout" onclick="procesarConfirmacionPedido()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-base hover:bg-[#e0725a] transition-colors shadow-sm">Confirmar</button>
       </div>
     </div>
   </div>
@@ -384,6 +386,25 @@
       <div class="flex gap-3">
         <button onclick="cerrarModalConfirmacion()" class="flex-1 py-3 border border-purple-200 text-gray-500 rounded-xl font-semibold text-base hover:bg-gray-50 transition-colors">Cancelar</button>
         <button id="btn-confirmar-add" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-base hover:bg-[#e0725a] transition-colors shadow-sm">Sí, agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CLIENTE NO REGISTRADO ==================== -->
+  <div id="modal-no-registrado" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300 p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center space-y-4 border border-purple-100">
+      <span class="text-5xl">✨</span>
+      <h4 class="font-magic text-xl font-bold text-[#7D5A94]">¡Hola! Aún no eres parte</h4>
+      <p class="text-sm text-gray-500 leading-relaxed px-2">
+        Al momento no te encuentras registrada en la Familia de MiaShop. ¿Te gustaría registrarte para poder completar tu compra y acceder a todas nuestras novedades?
+      </p>
+      <div class="flex gap-3 pt-2">
+        <button onclick="cerrarModalNoRegistrado()" class="flex-1 py-3 border border-purple-200 text-gray-500 rounded-xl font-semibold text-base hover:bg-gray-50 transition-colors">
+          Cancelar
+        </button>
+        <button onclick="redirigirRegistroWhatsApp()" class="flex-1 py-3 bg-[#F2846B] text-white rounded-xl font-bold text-base hover:bg-[#e0725a] transition-colors shadow-sm">
+          Sí, unirme
+        </button>
       </div>
     </div>
   </div>
@@ -691,7 +712,6 @@
       return audioCtxShared;
     }
 
-    // Desbloqueador global de Audio para iOS (Se dispara con el primer click del usuario)
     function desbloquearAudioIOS() {
       try {
         const ctx = getAudioContextShared();
@@ -805,7 +825,7 @@
             response = JSON.parse(text);
           } catch (jsonErr) {
             console.error("Respuesta no es JSON válido:", text);
-            alert("Atención de Conexión:\nEl enlace de tu Google Apps Script no devuelve datos válidos de catálogo.\n\nAsegúrate de haber ingresado tu URL propia y de haber configurado los permisos de tu Web App para que cualquiera (Anyone) pueda acceder.");
+            alert("Atención de Conexión:\nEl enlace de tu Google Apps Script no devuelve datos válidos de catálogo.\n\nAsegúrate de haber ingresado tu URL propia y de haber configurado los permisos de tu Web App.");
             return;
           }
 
@@ -1048,7 +1068,6 @@
       mostrarMensajeAlerta("¡Agregado con éxito a tu pedido! ✨");
     }
 
-    // CONTADOR DE CARRITO CON AUTODEFENSA (Previene paros silenciosos)
     function actualizarContadorCarrito() {
       if (!Array.isArray(carrito)) {
         carrito = [];
@@ -1091,18 +1110,15 @@
       vacio.classList.add('hidden');
       totales.classList.remove('hidden');
       
-      // Mostrar Mascota Mimi
       mascota.classList.remove('hidden');
       mascota.style.opacity = '1';
       mascota.style.maxHeight = '300px';
       mascota.style.margin = '';
       mascota.style.padding = '';
 
-      // Seleccionar frase alentadora
       const fraseAzar = frasesMascota[Math.floor(Math.random() * frasesMascota.length)];
       document.getElementById('mascota-frase').textContent = fraseAzar;
 
-      // Desaparecer la mascota suavemente tras 10 segundos
       if (window.mimiTimer) clearTimeout(window.mimiTimer);
       window.mimiTimer = setTimeout(() => {
         mascota.style.transition = 'opacity 0.8s ease, max-height 0.8s ease, margin 0.8s ease';
@@ -1183,9 +1199,35 @@
       modal.classList.remove('opacity-100');
     }
 
-    // ==================== ENVÍO AUTOMÁTICO A APPS SCRIPT (CORS) ====================
+    // ==================== NO REGISTRADO MODAL INTERFACES ====================
+    function abrirModalNoRegistrado() {
+      const modal = document.getElementById('modal-no-registrado');
+      if (modal) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+      }
+    }
+
+    function cerrarModalNoRegistrado() {
+      const modal = document.getElementById('modal-no-registrado');
+      if (modal) {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100');
+      }
+    }
+
+    function redirigirRegistroWhatsApp() {
+      cerrarModalNoRegistrado();
+      const numeroCelularAdmin = "51983663828";
+      const mensaje = "Hola me gustaria que me puedas registrar, quiero ser parte de la familia MiaShop";
+      const link = `https://wa.me/${numeroCelularAdmin}?text=${encodeURIComponent(mensaje)}`;
+      window.open(link, '_blank');
+    }
+
+    // ==================== VERIFICACIÓN Y ENVÍO AUTOMÁTICO A APPS SCRIPT ====================
     function procesarConfirmacionPedido() {
       const dni = document.getElementById('form-dni').value.trim();
+      const btnConfirmar = document.getElementById('btn-procesar-checkout');
 
       if (!dni) {
         alert("Por favor, introduce tu número de identidad para culminar.");
@@ -1197,6 +1239,43 @@
         return;
       }
 
+      // Deshabilitamos el botón temporalmente y damos feedback visual de espera
+      btnConfirmar.disabled = true;
+      btnConfirmar.textContent = "Verificando... 🔍";
+
+      // 1. Validamos en la base de datos de Sheets si la clienta existe
+      fetch(`${API_URL}?action=verificarCliente&dni=${dni}`, { redirect: "follow" })
+        .then(res => res.text())
+        .then(text => {
+          let response;
+          try {
+            response = JSON.parse(text);
+          } catch(e) {
+            console.error("Error interpretando verificación:", e);
+            response = { success: false }; // Seguridad por fallo de parseo
+          }
+
+          if (response && response.success) {
+            // Clienta registrada encontrada: Procesar el pedido con su nombre de base de datos
+            const nombreClienteValido = response.nombre || "Clienta Registrada";
+            ejecutarRegistroDePedido(dni, nombreClienteValido);
+          } else {
+            // Clienta no registrada: Mostrar el modal amable de WhatsApp
+            cerrarModalCheckout();
+            abrirModalNoRegistrado();
+          }
+        })
+        .catch(err => {
+          console.error("Error verificando cliente:", err);
+          alert("Hubo un problema de conexión al verificar tu identidad. Por favor intenta de nuevo.");
+        })
+        .finally(() => {
+          btnConfirmar.disabled = false;
+          btnConfirmar.textContent = "Confirmar";
+        });
+    }
+
+    function ejecutarRegistroDePedido(dni, nombreCliente) {
       let totalVenta = 0;
       let totalCompra = 0;
       const detalleProductos = carrito.map(item => {
@@ -1209,7 +1288,7 @@
 
       const pedidoDTO = {
         dniCliente: dni,
-        nombreCliente: "", 
+        nombreCliente: nombreCliente, 
         departamento: "", 
         detalleProductos: detalleProductos,
         categoriaPrincipal: carrito.length > 0 ? carrito[0].categoria : "General",
@@ -1227,7 +1306,7 @@
         .then(res => res.json())
         .then(response => {
           if (response.success) {
-            pedidoDTO.nombreCliente = response.nombreCliente || "Clienta Nueva";
+            pedidoDTO.nombreCliente = response.nombreCliente || nombreCliente || "Clienta MiaShop";
             generarEnlaceWhatsApp(pedidoDTO);
             
             carrito = [];
@@ -1242,7 +1321,7 @@
           }
         })
         .catch(err => {
-          console.error("Fallo de red: ", err);
+          console.error("Fallo de red al registrar pedido: ", err);
         });
     }
 
@@ -1282,7 +1361,6 @@
         .then(res => res.json())
         .then(response => {
           if (response.success) {
-            // Guardamos localmente la consulta para abrir las boletas al instante sin re-consultar la red
             pedidosConsultados = response.pedidos || [];
             renderizarPedidosConsulta(response.pedidos);
           } else {
@@ -1405,14 +1483,12 @@
       }
     }
 
-    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES (OPT-IN PARA IOS) ====================
+    // ==================== VISUALIZADOR DE BOLETAS VIRTUALES ====================
     function abrirBoleta(idPedido) {
       const loaderEspera = document.getElementById('modal-espera-boleta');
       loaderEspera.classList.remove('opacity-0', 'pointer-events-none');
       loaderEspera.classList.add('opacity-100');
 
-      // Se usa la caché local de pedidos ya descargados para evitar solicitudes de red adicionales.
-      // Esto resuelve el bloqueo silencioso de redirecciones CORS en Safari para iPhone.
       setTimeout(() => {
         loaderEspera.classList.add('opacity-0', 'pointer-events-none');
         loaderEspera.classList.remove('opacity-100');
@@ -1441,7 +1517,7 @@
         const modal = document.getElementById('modal-boleta');
         modal.classList.remove('opacity-0', 'pointer-events-none');
         modal.classList.add('opacity-100');
-      }, 600); // Pequeña demora para dar feedback visual antes de renderizar
+      }, 600); 
     }
 
     function cerrarModalBoleta() {
