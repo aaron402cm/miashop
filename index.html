@@ -915,6 +915,11 @@
         document.getElementById('det-sku-cat').textContent = `${prod.sku} | ${prod.categoria}`;
         document.getElementById('det-precio').textContent = `S/ ${parseFloat(prod.precioVenta || 0).toFixed(2)}`;
         document.getElementById('det-descripcion').textContent = prod.descripcion || "Sin descripción por el momento.";
+
+        btnComprar.onclick = function() {
+          cerrarModalDetalle();
+          solicitarAgregarAlCarrito(prod.sku);
+        };
       }
 
       const imgPrincipal = document.getElementById('det-img-principal');
