@@ -154,10 +154,10 @@
       <!-- Banner de Bienvenida inteligente -->
       <div id="banner-principal" class="bg-gradient-to-r from-[#7D5A94] to-[#F2846B] text-white p-6 rounded-3xl shadow-md flex items-center justify-center min-h-[140px] relative overflow-hidden transition-all duration-700">
         
-        <!-- Vista Inicial: Texto "Importaciones Mágicas" -->
+        <!-- Vista Inicial: Texto "Importaciones MiaShop" -->
         <div id="banner-vista-texto" class="text-center space-y-2 z-10 transition-opacity duration-700">
           <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">On-Demand</span>
-          <h2 class="font-magic text-3xl font-bold">Importaciones Mágicas</h2>
+          <h2 class="font-magic text-3xl font-bold">Importaciones MiaShop</h2>
           <p class="text-base text-purple-100 max-w-sm mx-auto">Explora las últimas tendencias seleccionadas especialmente para ti. Pide hoy y recíbelo cómodamente.</p>
         </div>
         
@@ -197,7 +197,9 @@
     <section id="sec-carrito" class="space-y-6 hidden">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-purple-100 pb-4 gap-4">
         <h2 class="font-magic text-2xl font-bold text-[#7D5A94]">📋 Mi Carrito de Compras</h2>
-        <button onclick="vaciarCarrito()" class="text-sm text-red-500 hover:underline font-semibold text-left">Vaciar Carrito</button>
+        <button onclick="vaciarCarrito()" class="text-sm text-red-500 hover:underline font-semibold text-left flex items-center gap-1">
+          🗑️ Vaciar Carrito
+        </button>
       </div>
 
       <!-- Mascota MIMI Compacta (Mensaje ARRIBA del gatito - Temporizada a 10s) -->
@@ -603,7 +605,7 @@
       "¡Es una preciosidad! Ideal para complementar tu hogar con elegancia.",
       "¡Muy inteligente de tu parte elegir este producto hoy!",
       "¡Qué selección tan sobresaliente! Has escogido con sabiduría.",
-      "¡Un aplauso para tu carrito de compras! Excelente combinación.",
+      "¡Un primer nivel de buen gusto! Excelente combinación.",
       "¡Es una verdadera joya de buen gusto! Te aseguro que querrás pedir otro pronto.",
       "¡Qué decisión tan acertada! Un producto sumamente elegante.",
       "¡Maravillosa elección! Un producto lleno de detalles encantadores.",
@@ -1150,22 +1152,31 @@
         subtotal += itemTotal;
 
         const row = `
-          <div class="bg-white p-4 rounded-2xl border border-purple-100 flex items-center justify-between gap-4">
-            <div class="flex-1">
-              <span class="text-xs font-bold text-[#7D5A94] uppercase">${item.sku} | ${item.categoria}</span>
-              <h4 onclick="mostrarDetalleProducto('${item.sku}', true)" class="font-magic text-lg font-bold text-[#7D5D99] hover:underline cursor-pointer leading-snug">${item.nombre}</h4>
-              <p class="text-base font-extrabold text-[#F2846B] mt-0.5">S/ ${precio.toFixed(2)} c/u</p>
+          <div class="bg-white p-5 rounded-3xl border border-purple-100 flex flex-col gap-4 shadow-sm">
+            <!-- Fila Superior: Información del Producto -->
+            <div class="border-b border-purple-50/50 pb-3">
+              <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${item.sku} | ${item.categoria}</span>
+              <h4 onclick="mostrarDetalleProducto('${item.sku}', true)" class="font-magic text-xl font-bold text-[#7D5D99] hover:underline cursor-pointer leading-tight mt-1">${item.nombre}</h4>
+              <p class="text-sm font-semibold text-[#F2846B] mt-1">Precio: S/ ${precio.toFixed(2)} c/u</p>
             </div>
             
-            <div class="flex items-center gap-2">
-              <button onclick="modificarCantidadItem(${index}, -1)" class="w-8 h-8 rounded-full border border-purple-200 flex items-center justify-center font-bold text-gray-600 hover:bg-purple-50">-</button>
-              <span class="w-8 text-center text-base font-bold text-gray-800">${item.cantidad}</span>
-              <button onclick="modificarCantidadItem(${index}, 1)" class="w-8 h-8 rounded-full border border-purple-200 flex items-center justify-center font-bold text-gray-600 hover:bg-purple-50">+</button>
-            </div>
+            <!-- Fila Inferior: Controles de Cantidad y Total de este Producto -->
+            <div class="flex items-center justify-between gap-4">
+              <!-- Selector de Cantidad Táctil con etiqueta clara -->
+              <div class="flex flex-col gap-1.5">
+                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Cantidad</span>
+                <div class="flex items-center bg-purple-50/40 rounded-xl p-1 border border-purple-100/50">
+                  <button onclick="modificarCantidadItem(${index}, -1)" class="w-9 h-9 rounded-lg bg-white border border-purple-100 flex items-center justify-center font-extrabold text-[#7D5A94] hover:bg-purple-50 active:scale-95 transition-transform" title="Disminuir cantidad">-</button>
+                  <span class="w-10 text-center text-base font-extrabold text-gray-800">${item.cantidad}</span>
+                  <button onclick="modificarCantidadItem(${index}, 1)" class="w-9 h-9 rounded-lg bg-white border border-purple-100 flex items-center justify-center font-extrabold text-[#7D5A94] hover:bg-purple-50 active:scale-95 transition-transform" title="Aumentar cantidad">+</button>
+                </div>
+              </div>
 
-            <div class="text-right">
-              <p class="text-xs text-gray-400">Total</p>
-              <p class="text-base font-extrabold text-[#7D5A94]">S/ ${itemTotal.toFixed(2)}</p>
+              <!-- Total calculado de este producto -->
+              <div class="text-right">
+                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wide block">Total producto</span>
+                <span class="text-lg font-extrabold text-[#7D5A94]">S/ ${itemTotal.toFixed(2)}</span>
+              </div>
             </div>
           </div>
         `;
