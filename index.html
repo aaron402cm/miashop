@@ -917,11 +917,12 @@
       
       grid.innerHTML = "";
       
+      // Modificación: Agregamos .reverse() al final para invertir el orden de renderizado
       const filtrados = catalogoProductos.filter(prod => {
         if (categoriaSeleccionada !== 'Todas' && prod.categoria !== categoriaSeleccionada) return false;
         if (query && !prod.nombre.toLowerCase().includes(query)) return false;
         return prod.estado === "Activo";
-      });
+      }).reverse();
 
       if (filtrados.length === 0) {
         grid.innerHTML = `
